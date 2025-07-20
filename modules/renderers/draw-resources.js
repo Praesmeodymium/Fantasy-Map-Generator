@@ -1,0 +1,14 @@
+"use strict";
+
+function drawResources() {
+  TIME && console.time("drawResources");
+  resources.selectAll("*").remove();
+  const html = pack.resources.map(r => {
+    const type = Resources.getType(r.type);
+    const color = type?.color || "#000";
+    const size = 3;
+    return `<circle id="resource${r.i}" cx="${r.x}" cy="${r.y}" r="${size}" fill="${color}" />`;
+  });
+  resources.html(html.join(""));
+  TIME && console.timeEnd("drawResources");
+}

@@ -209,6 +209,7 @@ function drawLayers() {
   if (layerIsOn("toggleBurgIcons")) drawBurgIcons();
   if (layerIsOn("toggleMilitary")) drawMilitary();
   if (layerIsOn("toggleMarkers")) drawMarkers();
+  if (layerIsOn("toggleResources")) drawResources();
   if (layerIsOn("toggleRulers")) rulers.draw();
   // scale bar
   // vignette
@@ -869,6 +870,18 @@ function toggleMarkers(event) {
   }
 }
 
+function toggleResources(event) {
+  if (!layerIsOn("toggleResources")) {
+    turnButtonOn("toggleResources");
+    drawResources();
+    if (event && isCtrlClick(event)) editStyle("resources");
+  } else {
+    if (event && isCtrlClick(event)) return editStyle("resources");
+    resources.selectAll("*").remove();
+    turnButtonOff("toggleResources");
+  }
+}
+
 function toggleLabels(event) {
   if (!layerIsOn("toggleLabels")) {
     turnButtonOn("toggleLabels");
@@ -1037,5 +1050,6 @@ function getLayer(id) {
   if (id === "toggleLabels") return $("#labels");
   if (id === "toggleBurgIcons") return $("#icons");
   if (id === "toggleMarkers") return $("#markers");
+  if (id === "toggleResources") return $("#resources");
   if (id === "toggleRulers") return $("#ruler");
 }

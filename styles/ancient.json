@@ -99,6 +99,10 @@
     "rescale": 1,
     "filter": null
   },
+  "#resources": {
+    "opacity": null,
+    "filter": null
+  },
   "#prec": {
     "opacity": null,
     "stroke": "#000000",

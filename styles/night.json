@@ -99,6 +99,10 @@
     "rescale": null,
     "filter": "url(#dropShadow01)"
   },
+  "#resources": {
+    "opacity": null,
+    "filter": null
+  },
   "#prec": {
     "opacity": null,
     "stroke": "#ffffff",
