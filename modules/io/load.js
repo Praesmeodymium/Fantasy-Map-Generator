@@ -351,6 +351,7 @@ async function parseLoadedData(data, mapVersion) {
       anchors = icons.select("#anchors");
       armies = viewbox.select("#armies");
       markers = viewbox.select("#markers");
+      resources = viewbox.select("#resources");
       ruler = viewbox.select("#ruler");
       fogging = viewbox.select("#fogging");
       debug = viewbox.select("#debug");
@@ -392,6 +393,7 @@ async function parseLoadedData(data, mapVersion) {
       pack.markers = data[35] ? JSON.parse(data[35]) : [];
       pack.routes = data[37] ? JSON.parse(data[37]) : [];
       pack.zones = data[38] ? JSON.parse(data[38]) : [];
+      pack.resources = data[39] ? JSON.parse(data[39]) : [];
       pack.cells.biome = Uint8Array.from(data[16].split(","));
       pack.cells.burg = Uint16Array.from(data[17].split(","));
       pack.cells.conf = Uint8Array.from(data[18].split(","));
@@ -456,6 +458,7 @@ async function parseLoadedData(data, mapVersion) {
       if (isVisible(icons)) turnOn("toggleBurgIcons");
       if (hasChildren(armies) && isVisible(armies)) turnOn("toggleMilitary");
       if (hasChildren(markers)) turnOn("toggleMarkers");
+      if (hasChildren(resources)) turnOn("toggleResources");
       if (isVisible(ruler)) turnOn("toggleRulers");
       if (isVisible(scaleBar)) turnOn("toggleScaleBar");
       if (isVisibleNode(byId("vignette"))) turnOn("toggleVignette");

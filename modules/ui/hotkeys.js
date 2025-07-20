@@ -53,6 +53,7 @@ function handleKeyup(event) {
   else if (shift && code === "KeyV") overviewRivers();
   else if (shift && code === "KeyM") overviewMilitary();
   else if (shift && code === "KeyK") overviewMarkers();
+  else if (shift && code === "KeyX") editResources();
   else if (shift && code === "KeyE") viewCellDetails();
   else if (key === "!") toggleAddBurg();
   else if (key === "@") toggleAddLabel();
@@ -84,6 +85,7 @@ function handleKeyup(event) {
   else if (code === "KeyI") toggleBurgIcons();
   else if (code === "KeyM") toggleMilitary();
   else if (code === "KeyK") toggleMarkers();
+  else if (code === "KeyQ") toggleResources();
   else if (code === "Equal" && !customization) toggleRulers();
   else if (code === "Slash") toggleScaleBar();
   else if (code === "BracketLeft") toggleVignette();
