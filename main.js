@@ -83,6 +83,7 @@ let burgIcons = icons.append("g").attr("id", "burgIcons");
 let anchors = icons.append("g").attr("id", "anchors");
 let armies = viewbox.append("g").attr("id", "armies");
 let markers = viewbox.append("g").attr("id", "markers");
+let resources = viewbox.append("g").attr("id", "resources");
 let fogging = viewbox
   .append("g")
   .attr("id", "fogging-cont")
@@ -663,6 +664,7 @@ async function generate(options) {
 
     Military.generate();
     Markers.generate();
+    await Resources.generate();
     Zones.generate();
 
     drawScaleBar(scaleBar, scale);

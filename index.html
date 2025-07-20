@@ -679,6 +679,14 @@
               Mar<u>k</u>ers
             </li>
             <li
+              id="toggleResources"
+              data-tip="Resources: click to toggle, drag to raise or lower the layer. Ctrl + click to edit layer style"
+              data-shortcut="Q"
+              onclick="toggleResources(event)"
+            >
+              Resources
+            </li>
+            <li
               id="toggleRulers"
               data-tip="Rulers: click to toggle, drag to move, click on label to delete. Ctrl + click to edit layer style"
               data-shortcut="= (equal sign)"
@@ -775,6 +783,7 @@
             <option value="landmass">Landmass</option>
             <option value="legend">Legend</option>
             <option value="markers">Markers</option>
+            <option value="resources">Resources</option>
             <option value="armies">Military</option>
             <option value="ocean">Ocean</option>
             <option value="population">Population</option>
@@ -8105,6 +8114,7 @@
     <script src="modules/religions-generator.js?v=1.106.0"></script>
     <script src="modules/military-generator.js?v=1.107.0"></script>
     <script src="modules/markers-generator.js?v=1.107.0"></script>
+    <script src="modules/resources-generator.js?v=1.0.0"></script>
     <script src="modules/zones-generator.js?v=1.106.0"></script>
     <script src="modules/coa-generator.js?v=1.99.00"></script>
     <script src="modules/resample.js?v=1.106.4"></script>
@@ -8172,6 +8182,7 @@
     <script defer src="modules/renderers/draw-borders.js?v=1.104.0"></script>
     <script defer src="modules/renderers/draw-heightmap.js?v=1.104.0"></script>
     <script defer src="modules/renderers/draw-markers.js?v=1.108.5"></script>
+    <script defer src="modules/renderers/draw-resources.js?v=1.0.0"></script>
     <script defer src="modules/renderers/draw-scalebar.js?v=1.108.1"></script>
     <script defer src="modules/renderers/draw-temperature.js?v=1.104.0"></script>
     <script defer src="modules/renderers/draw-emblems.js?v=1.104.0"></script>

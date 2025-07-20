@@ -1,0 +1,9 @@
+[
+  {"id":1,"name":"Iron","color":"#b7410e","base":0.05,"type":"metal"},
+  {"id":2,"name":"Copper","color":"#b87333","base":0.04,"type":"metal"},
+  {"id":3,"name":"Gold","color":"#ffd700","base":0.01,"type":"metal"},
+  {"id":4,"name":"Coal","color":"#444","base":0.07,"type":"fuel"},
+  {"id":5,"name":"Oil","color":"#222","base":0.03,"type":"fuel"},
+  {"id":6,"name":"Mithril","color":"#8a8aff","base":0.005,"type":"magic"},
+  {"id":7,"name":"Mana Crystal","color":"#00ffff","base":0.005,"type":"magic"}
+]
