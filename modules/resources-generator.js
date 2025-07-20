@@ -49,7 +49,6 @@ window.Resources = (function () {
       pack.resources.push({i: ++id, type: type.id, x: rn(x, 2), y: rn(y, 2), cell: i});
     }
   }
-
   async function regenerate() {
     await generate();
     if (window.drawResources) drawResources();
@@ -59,4 +58,10 @@ window.Resources = (function () {
   const getTypes = () => types.slice();
 
   return {generate, regenerate, getType, getTypes};
+=======
+  const getType = id => types.find(t => t.id === id);
+  const getTypes = () => types.slice();
+
+  return {generate, getType, getTypes};
+
 })();
