@@ -19,6 +19,7 @@ toolsContent.addEventListener("click", function (event) {
   else if (button === "editNamesBaseButton") editNamesbase();
   else if (button === "editUnitsButton") editUnits();
   else if (button === "editNotesButton") editNotes();
+  else if (button === "editResourcesButton") editResources();
   else if (button === "editZonesButton") editZones();
   else if (button === "overviewChartsButton") overviewCharts();
   else if (button === "overviewBurgsButton") overviewBurgs();
@@ -95,6 +96,7 @@ function processFeatureRegeneration(event, button) {
   else if (button === "regenerateMilitary") regenerateMilitary();
   else if (button === "regenerateIce") regenerateIce();
   else if (button === "regenerateMarkers") regenerateMarkers();
+  else if (button === "regenerateResources") Resources.regenerate();
   else if (button === "regenerateZones") regenerateZones(event);
 }
 
