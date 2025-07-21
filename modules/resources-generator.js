@@ -58,10 +58,5 @@ window.Resources = (function () {
   const getTypes = () => types.slice();
 
   return {generate, regenerate, getType, getTypes};
-=======
-  const getType = id => types.find(t => t.id === id);
-  const getTypes = () => types.slice();
-
-  return {generate, getType, getTypes};
 
 })();
