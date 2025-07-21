@@ -1,9 +1,9 @@
 [
-  {"id":1,"name":"Iron","color":"#b7410e","base":0.05,"size":1,"type":"metal"},
-  {"id":2,"name":"Copper","color":"#b87333","base":0.04,"size":1,"type":"metal"},
-  {"id":3,"name":"Gold","color":"#ffd700","base":0.01,"size":1,"type":"metal"},
-  {"id":4,"name":"Coal","color":"#444","base":0.07,"size":1,"type":"fuel"},
-  {"id":5,"name":"Oil","color":"#222","base":0.03,"size":1,"type":"fuel"},
-  {"id":6,"name":"Mithril","color":"#8a8aff","base":0.005,"size":1,"type":"magic"},
-  {"id":7,"name":"Mana Crystal","color":"#00ffff","base":0.005,"size":1,"type":"magic"}
+  {"id":1,"name":"Iron","color":"#b7410e","base":0.05,"size":2,"type":"metal","icon":"⚒️"},
+  {"id":2,"name":"Copper","color":"#b87333","base":0.04,"size":2,"type":"metal","icon":"🔩"},
+  {"id":3,"name":"Gold","color":"#ffd700","base":0.01,"size":1,"type":"metal","icon":"💰"},
+  {"id":4,"name":"Coal","color":"#444","base":0.07,"size":4,"type":"fuel","icon":"🪨"},
+  {"id":5,"name":"Oil","color":"#222","base":0.03,"size":3,"type":"fuel","icon":"🛢️"},
+  {"id":6,"name":"Mithril","color":"#8a8aff","base":0.005,"size":1,"type":"magic","icon":"🔮"},
+  {"id":7,"name":"Mana Crystal","color":"#00ffff","base":0.005,"size":1,"type":"magic","icon":"🔷"}
 ]

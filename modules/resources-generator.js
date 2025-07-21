@@ -4,6 +4,23 @@ window.Resources = (function () {
   let types = [];
   let displayBySize = false;
 
+  // region size used to group deposits for size similarity
+  const REGION = 120;
+
+  // deterministic pseudo-random number based on map seed and region
+  function regionRandom(x, y, typeId) {
+    const rx = Math.floor(x / REGION);
+    const ry = Math.floor(y / REGION);
+    return aleaPRNG(seed + "_" + typeId + "_" + rx + "_" + ry)();
+  }
+
+  function getRandomSize(type, x, y) {
+    const base = type.size || 1;
+    const r = regionRandom(x, y, type.id);
+    const factor = 0.8 + r * 0.4 + Math.random() * 0.2;
+    return Math.max(1, Math.round(base * factor));
+  }
+
   async function loadConfig() {
     if (types.length) return types;
     try {
@@ -46,8 +63,8 @@ window.Resources = (function () {
       }
       if (resIndex === -1) continue;
       const type = types[resIndex];
-      const size = type.size || 1;
       const [x, y] = cells.p[i];
+      const size = getRandomSize(type, x, y);
       const affected = size > 1 ? findAll(x, y, size) : [i];
       affected.forEach(c => {
         if (cells.h[c] < 20 || used.has(c)) return;
@@ -68,6 +85,6 @@ window.Resources = (function () {
   const setDisplayMode = value => (displayBySize = value);
   const getDisplayMode = () => displayBySize;
 
-  return {generate, regenerate, getType, getTypes, updateTypes, setDisplayMode, getDisplayMode};
+  return {generate, regenerate, getType, getTypes, updateTypes, setDisplayMode, getDisplayMode, getRandomSize};
 
 })();
