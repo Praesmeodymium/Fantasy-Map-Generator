@@ -144,7 +144,8 @@ function editResources() {
       if (typeId) {
         const [x, y] = pack.cells.p[i];
         const id = last(pack.resources)?.i + 1 || 1;
-        const size = Resources.getType(typeId).size || 1;
+        const type = Resources.getType(typeId);
+        const size = Resources.getRandomSize(type, x, y);
         pack.resources.push({i: id, type: typeId, x: rn(x,2), y: rn(y,2), cell: i, size});
       }
     });
