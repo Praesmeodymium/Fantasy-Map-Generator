@@ -7,7 +7,8 @@ function drawResources() {
     const type = Resources.getType(r.type);
     const color = type?.color || "#000";
     const size = 3;
-    return `<circle id="resource${r.i}" cx="${r.x}" cy="${r.y}" r="${size}" fill="${color}" />`;
+    const name = type?.name || "Unknown";
+    return `<circle id="resource${r.i}" cx="${r.x}" cy="${r.y}" r="${size}" fill="${color}" data-tip="${name}" />`;
   });
   resources.html(html.join(""));
   TIME && console.timeEnd("drawResources");
