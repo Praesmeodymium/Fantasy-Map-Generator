@@ -45,6 +45,7 @@ function editResources() {
     else if (cl.contains("resourceBase")) resourceChangeBase(el);
     else if (cl.contains("resourceSize")) resourceChangeSize(el);
     else if (cl.contains("resourceIcon")) resourceChangeIcon(el);
+    else if (cl.contains("resourceVisible")) resourceToggleVisibility(el);
   });
 
   function refreshResourcesEditor() {
@@ -60,6 +61,7 @@ function editResources() {
         const count = counts[t.id] || 0;
         return `<div class="states resources" data-id="${t.id}" data-name="${t.name}" data-color="${t.color}" data-base="${t.base}" data-size="${t.size}" data-icon="${t.icon || ''}" data-cells="${count}">`+
           `<fill-box fill="${t.color}" class="resourceColor"></fill-box>`+
+          `<input class="resourceVisible" type="checkbox" ${Resources.isTypeVisible(t.id) ? "checked" : ""}/>`+
           `<input class="resourceIcon" value="${t.icon || ''}" style="width:2em"/>`+
           `<input class="resourceName" value="${t.name}" style="width:8em"/>`+
           `<input class="resourceBase" type="number" step="0.001" value="${t.base}" style="width:4em"/>`+
@@ -71,6 +73,7 @@ function editResources() {
       .join("");
     lines += `<div class="states resources" data-id="0" data-name="None" data-color="#eee" data-base="0" data-size="1" data-icon="" data-cells="0">`+
              `<fill-box fill="#eee" class="resourceColor"></fill-box>`+
+             `<input class="resourceVisible" type="checkbox" checked disabled/>`+
              `<input class="resourceIcon" value="" style="width:2em"/>`+
              `<div class="resourceName" style="width:8em">None</div>`+
              `<input class="resourceBase" type="number" step="0.001" value="0" style="width:4em"/>`+
@@ -83,18 +86,10 @@ function editResources() {
   }
 
   function updateFilters() {
-    const types = Resources.getTypes();
-    const checkboxes = types
-      .map(t => `<label style="margin-left:3px"><input type="checkbox" data-id="${t.id}">${t.name}</label>`)
-      .join("");
-    filters.innerHTML = checkboxes;
-    filters.querySelectorAll("input").forEach(input => {
-      input.checked = Resources.isTypeVisible(+input.dataset.id);
-      input.addEventListener("change", () => {
-        if (input.checked) Resources.showType(input.dataset.id);
-        else Resources.hideType(input.dataset.id);
-        drawResources();
-      });
+    body.querySelectorAll("div.states.resources").forEach(line => {
+      const id = +line.dataset.id;
+      const cb = line.querySelector(".resourceVisible");
+      if (cb) cb.checked = Resources.isTypeVisible(id);
     });
   }
 
@@ -253,6 +248,13 @@ function editResources() {
     Resources.updateTypes(types);
     drawResources();
     updateFilters();
+  }
+
+  function resourceToggleVisibility(el) {
+    const resource = +el.parentNode.dataset.id;
+    if (el.checked) Resources.showType(resource);
+    else Resources.hideType(resource);
+    drawResources();
   }
 
   function removeCustomResource(el) {
