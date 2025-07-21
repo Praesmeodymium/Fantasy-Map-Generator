@@ -41,6 +41,7 @@ function editResources() {
     if (cl.contains("resourceName")) resourceChangeName(el);
     else if (cl.contains("resourceBase")) resourceChangeBase(el);
     else if (cl.contains("resourceSize")) resourceChangeSize(el);
+    else if (cl.contains("resourceIcon")) resourceChangeIcon(el);
   });
 
   function refreshResourcesEditor() {
@@ -54,8 +55,9 @@ function editResources() {
     let lines = types
       .map(t => {
         const count = counts[t.id] || 0;
-        return `<div class="states resources" data-id="${t.id}" data-name="${t.name}" data-color="${t.color}" data-base="${t.base}" data-size="${t.size}" data-cells="${count}">`+
+        return `<div class="states resources" data-id="${t.id}" data-name="${t.name}" data-color="${t.color}" data-base="${t.base}" data-size="${t.size}" data-icon="${t.icon || ''}" data-cells="${count}">`+
           `<fill-box fill="${t.color}" class="resourceColor"></fill-box>`+
+          `<input class="resourceIcon" value="${t.icon || ''}" style="width:2em"/>`+
           `<input class="resourceName" value="${t.name}" style="width:8em"/>`+
           `<input class="resourceBase" type="number" step="0.001" value="${t.base}" style="width:4em"/>`+
           `<input class="resourceSize" type="number" step="1" min="1" value="${t.size}" style="width:4em"/>`+
@@ -64,8 +66,9 @@ function editResources() {
           `</div>`;
       })
       .join("");
-    lines += `<div class="states resources" data-id="0" data-name="None" data-color="#eee" data-base="0" data-size="1" data-cells="0">`+
+    lines += `<div class="states resources" data-id="0" data-name="None" data-color="#eee" data-base="0" data-size="1" data-icon="" data-cells="0">`+
              `<fill-box fill="#eee" class="resourceColor"></fill-box>`+
+             `<input class="resourceIcon" value="" style="width:2em"/>`+
              `<div class="resourceName" style="width:8em">None</div>`+
              `<input class="resourceBase" type="number" step="0.001" value="0" style="width:4em"/>`+
              `<input class="resourceSize" type="number" step="1" min="1" value="1" style="width:4em"/>`+
@@ -219,6 +222,15 @@ function editResources() {
     Resources.updateTypes(types);
   }
 
+  function resourceChangeIcon(el) {
+    const resource = +el.parentNode.dataset.id;
+    const types = Resources.getTypes();
+    const type = types.find(t => t.id === resource);
+    if (type) type.icon = el.value;
+    Resources.updateTypes(types);
+    drawResources();
+  }
+
   function removeCustomResource(el) {
     const resource = +el.parentNode.dataset.id;
     const types = Resources.getTypes().filter(t => t.id !== resource);
@@ -238,7 +250,7 @@ function editResources() {
     if (types.length >= 32)
       return tip("Maximum number of resources reached (32)", false, "error");
     const id = types.reduce((m, t) => Math.max(m, t.id), 0) + 1;
-    types.push({id, name: "Custom", color: getRandomColor(), base: 0.01, size: 1, type: "custom", custom: true});
+    types.push({id, name: "Custom", color: getRandomColor(), base: 0.01, size: 1, type: "custom", custom: true, icon: ""});
     Resources.updateTypes(types);
     refreshResourcesEditor();
   }
