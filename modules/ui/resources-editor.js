@@ -7,6 +7,8 @@ function editResources() {
   const body = byId("resourcesBody");
   refreshResourcesEditor();
   byId("resourcesDisplaySize").checked = Resources.getDisplayMode();
+  byId("resourcesUseIcons").checked = Resources.getUseIcons();
+  byId("resourcesFrequency").value = Resources.getFrequency();
 
   if (modules.editResources) return;
   modules.editResources = true;
@@ -243,6 +245,19 @@ function editResources() {
   byId("resourcesDisplaySize").addEventListener("change", () => {
     Resources.setDisplayMode(byId("resourcesDisplaySize").checked);
     drawResources();
+  });
+  byId("resourcesUseIcons").addEventListener("change", () => {
+    Resources.setUseIcons(byId("resourcesUseIcons").checked);
+    drawResources();
+  });
+  byId("resourcesFrequency").addEventListener("change", () => {
+    const val = +byId("resourcesFrequency").value;
+    if (isNaN(val) || val < 0) {
+      byId("resourcesFrequency").value = Resources.getFrequency();
+      return tip("Please provide a valid frequency", false, "error");
+    }
+    Resources.setFrequency(val);
+    regenerateResources();
   });
 
   function addCustomResource() {

@@ -3,6 +3,8 @@
 window.Resources = (function () {
   let types = [];
   let displayBySize = false;
+  let useIcons = true;
+  let frequency = 0.1; // overall spawn rate multiplier
 
   // region size used to group deposits for size similarity
   const REGION = 120;
@@ -51,7 +53,7 @@ window.Resources = (function () {
         return w;
       });
       const total = weights.reduce((a, b) => a + b, 0);
-      if (Math.random() >= total) continue;
+      if (Math.random() >= total * frequency) continue;
       let r = Math.random() * total;
       let resIndex = -1;
       for (let j = 0; j < weights.length; j++) {
@@ -84,7 +86,24 @@ window.Resources = (function () {
   const updateTypes = t => (types = t.slice());
   const setDisplayMode = value => (displayBySize = value);
   const getDisplayMode = () => displayBySize;
+  const setUseIcons = value => (useIcons = value);
+  const getUseIcons = () => useIcons;
+  const setFrequency = value => (frequency = +value);
+  const getFrequency = () => frequency;
 
-  return {generate, regenerate, getType, getTypes, updateTypes, setDisplayMode, getDisplayMode, getRandomSize};
+  return {
+    generate,
+    regenerate,
+    getType,
+    getTypes,
+    updateTypes,
+    setDisplayMode,
+    getDisplayMode,
+    setUseIcons,
+    getUseIcons,
+    setFrequency,
+    getFrequency,
+    getRandomSize
+  };
 
 })();
