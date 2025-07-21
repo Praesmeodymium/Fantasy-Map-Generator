@@ -61,7 +61,8 @@ function editResources() {
         const count = counts[t.id] || 0;
         return `<div class="states resources" data-id="${t.id}" data-name="${t.name}" data-color="${t.color}" data-base="${t.base}" data-size="${t.size}" data-icon="${t.icon || ''}" data-cells="${count}">`+
           `<fill-box fill="${t.color}" class="resourceColor"></fill-box>`+
-          `<input class="resourceVisible" type="checkbox" ${Resources.isTypeVisible(t.id) ? "checked" : ""}/>`+
+          `<input id="resourceVisible${t.id}" class="checkbox resourceVisible" type="checkbox" ${Resources.isTypeVisible(t.id) ? "checked" : ""}/>`+
+          `<label for="resourceVisible${t.id}" class="checkbox-label"></label>`+
           `<input class="resourceIcon" value="${t.icon || ''}" style="width:2em"/>`+
           `<input class="resourceName" value="${t.name}" style="width:8em"/>`+
           `<input class="resourceBase" type="number" step="0.001" value="${t.base}" style="width:4em"/>`+
@@ -73,7 +74,8 @@ function editResources() {
       .join("");
     lines += `<div class="states resources" data-id="0" data-name="None" data-color="#eee" data-base="0" data-size="1" data-icon="" data-cells="0">`+
              `<fill-box fill="#eee" class="resourceColor"></fill-box>`+
-             `<input class="resourceVisible" type="checkbox" checked disabled/>`+
+             `<input id="resourceVisible0" class="checkbox resourceVisible" type="checkbox" checked disabled/>`+
+             `<label for="resourceVisible0" class="checkbox-label"></label>`+
              `<input class="resourceIcon" value="" style="width:2em"/>`+
              `<div class="resourceName" style="width:8em">None</div>`+
              `<input class="resourceBase" type="number" step="0.001" value="0" style="width:4em"/>`+
