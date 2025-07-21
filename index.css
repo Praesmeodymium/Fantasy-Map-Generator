@@ -1437,8 +1437,15 @@ div.totalLine > div {
   display: inline-block;
 }
 
-div.states > input {
+div.states > input:not([type="checkbox"]) {
   width: 7em;
+  background: none;
+  border: 0;
+}
+
+div.states > input[type="checkbox"] {
+  width: 1em;
+  margin-right: 0.2em;
   background: none;
   border: 0;
 }
