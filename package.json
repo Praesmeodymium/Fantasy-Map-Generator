@@ -1,0 +1,23 @@
+{
+  "name": "fantasy-map-generator",
+  "version": "1.0.0",
+  "description": "Azgaar's _Fantasy Map Generator_ is a free web application that helps fantasy writers, game masters, and cartographers create and edit fantasy maps.",
+  "main": "main.js",
+  "scripts": {
+    "lint": "npx eslint .",
+    "format": "prettier --write .",
+    "test": "npx jest"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@babel/core": "^7.0.0",
+    "@babel/preset-env": "^7.0.0",
+    "babel-jest": "^27.0.0",
+    "eslint": "^8.0.0",
+    "jest": "^27.0.0",
+    "prettier": "^2.0.0"
+  }
+}

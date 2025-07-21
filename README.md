@@ -27,3 +27,33 @@ _Inspiration:_
 - Amit Patel's [_Polygonal Map Generation for Games_](http://www-cs-students.stanford.edu/~amitp/game-programming/polygon-map-generation)
 
 - Scott Turner's [_Here Dragons Abound_](https://heredragonsabound.blogspot.com)
+
+## Development Setup
+
+This project uses a Node-based toolchain for linting, formatting, and testing.
+
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+2. Run ESLint:
+   ```bash
+   npm run lint
+   ```
+3. Format code with Prettier:
+   ```bash
+   npm run format
+   ```
+4. Execute tests:
+   ```bash
+   npm test
+   ```
+
+If commands fail due to missing packages such as `jest` or `eslint`, ensure that
+development dependencies are installed:
+```bash
+npm install
+```
+
+These commands require `npm` and the listed dev dependencies to be installed.
+
