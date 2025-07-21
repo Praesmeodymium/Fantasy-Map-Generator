@@ -2,6 +2,7 @@
 
 window.Resources = (function () {
   let types = [];
+  const STORAGE_KEY = "resourcesConfig";
   let displayBySize = false;
   let useIcons = true;
   let frequency = 0.1; // overall spawn rate multiplier
@@ -26,8 +27,14 @@ window.Resources = (function () {
 
   async function loadConfig() {
     if (types.length) return types;
+    const stored = JSON.safeParse(localStorage.getItem(STORAGE_KEY));
+    if (stored?.length) {
+      types = stored;
+      return types;
+    }
     try {
       types = await (await fetch("config/resources.json")).json();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(types));
     } catch (e) {
       console.error("Failed to load resources config", e);
       types = [];
@@ -84,7 +91,10 @@ window.Resources = (function () {
 
   const getType = id => types.find(t => t.id === id);
   const getTypes = () => types.slice();
-  const updateTypes = t => (types = t.slice());
+  const updateTypes = t => {
+    types = t.slice();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(types));
+  };
   const setDisplayMode = value => (displayBySize = value);
   const getDisplayMode = () => displayBySize;
   const setUseIcons = value => (useIcons = value);
