@@ -648,6 +648,8 @@ async function generate(options) {
     Rivers.generate();
     Biomes.define();
 
+    await Resources.generate(); // generate resources before ranking cells so cultures can form around them
+
     rankCells();
     Cultures.generate();
     Cultures.expand();
@@ -664,7 +666,6 @@ async function generate(options) {
 
     Military.generate();
     Markers.generate();
-    await Resources.generate();
     Zones.generate();
 
     drawScaleBar(scaleBar, scale);
@@ -1198,6 +1199,19 @@ function rankCells() {
       } else {
         s += 5; // ocean coast is valued
         if (cells.harbor[i] === 1) s += 20; // safe sea harbor is valued
+      }
+    }
+
+    // resources influence
+    if (cells.resource) {
+      const resId = cells.resource[i];
+      if (resId) {
+        const res = Resources.getType(resId);
+        if (res) {
+          if (res.name === "Iron" || res.name === "Coal") s += 250; // strong influence
+          else if (res.type === "metal") s += 150; // other metals
+          else if (res.type === "magic") s += 75; // magical resources
+        }
       }
     }
 
