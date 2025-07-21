@@ -44,6 +44,7 @@ function editResources() {
     else if (cl.contains("resourceBase")) resourceChangeBase(el);
     else if (cl.contains("resourceSize")) resourceChangeSize(el);
     else if (cl.contains("resourceIcon")) resourceChangeIcon(el);
+    else if (cl.contains("resourceToggle")) resourceToggle(el);
   });
 
   function refreshResourcesEditor() {
@@ -57,7 +58,9 @@ function editResources() {
     let lines = types
       .map(t => {
         const count = counts[t.id] || 0;
+        const checked = Resources.isTypeVisible(t.id) ? "checked" : "";
         return `<div class="states resources" data-id="${t.id}" data-name="${t.name}" data-color="${t.color}" data-base="${t.base}" data-size="${t.size}" data-icon="${t.icon || ''}" data-cells="${count}">`+
+          `<input type="checkbox" class="resourceToggle" ${checked}/>`+
           `<fill-box fill="${t.color}" class="resourceColor"></fill-box>`+
           `<input class="resourceIcon" value="${t.icon || ''}" style="width:2em"/>`+
           `<input class="resourceName" value="${t.name}" style="width:8em"/>`+
@@ -69,6 +72,7 @@ function editResources() {
       })
       .join("");
     lines += `<div class="states resources" data-id="0" data-name="None" data-color="#eee" data-base="0" data-size="1" data-icon="" data-cells="0">`+
+             `<div></div>`+
              `<fill-box fill="#eee" class="resourceColor"></fill-box>`+
              `<input class="resourceIcon" value="" style="width:2em"/>`+
              `<div class="resourceName" style="width:8em">None</div>`+
@@ -230,6 +234,12 @@ function editResources() {
     const type = types.find(t => t.id === resource);
     if (type) type.icon = el.value;
     Resources.updateTypes(types);
+    drawResources();
+  }
+
+  function resourceToggle(el) {
+    const id = +el.parentNode.dataset.id;
+    if (el.checked) Resources.showType(id); else Resources.hideType(id);
     drawResources();
   }
 

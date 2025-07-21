@@ -5,6 +5,7 @@ window.Resources = (function () {
   let displayBySize = false;
   let useIcons = true;
   let frequency = 0.1; // overall spawn rate multiplier
+  const hidden = new Set();
 
   // region size used to group deposits for size similarity
   const REGION = 120;
@@ -23,7 +24,28 @@ window.Resources = (function () {
     return Math.max(1, Math.round(base * factor));
   }
 
+  function loadPersisted() {
+    const storedTypes = localStorage.getItem("resourcesConfig");
+    if (storedTypes) {
+      try { types = JSON.parse(storedTypes); } catch (e) {}
+    }
+    const storedHidden = localStorage.getItem("resourcesHidden");
+    if (storedHidden) {
+      try { JSON.parse(storedHidden).forEach(id => hidden.add(+id)); } catch (e) {}
+    }
+  }
+
+  function storeTypes() {
+    localStorage.setItem("resourcesConfig", JSON.stringify(types));
+  }
+
+  function storeHidden() {
+    localStorage.setItem("resourcesHidden", JSON.stringify(Array.from(hidden)));
+  }
+
   async function loadConfig() {
+    if (types.length) return types;
+    loadPersisted();
     if (types.length) return types;
     try {
       types = await (await fetch("config/resources.json")).json();
@@ -31,6 +53,7 @@ window.Resources = (function () {
       console.error("Failed to load resources config", e);
       types = [];
     }
+    storeTypes();
     return types;
   }
 
@@ -83,13 +106,21 @@ window.Resources = (function () {
 
   const getType = id => types.find(t => t.id === id);
   const getTypes = () => types.slice();
-  const updateTypes = t => (types = t.slice());
+  const updateTypes = t => {
+    types = t.slice();
+    storeTypes();
+  };
   const setDisplayMode = value => (displayBySize = value);
   const getDisplayMode = () => displayBySize;
   const setUseIcons = value => (useIcons = value);
   const getUseIcons = () => useIcons;
   const setFrequency = value => (frequency = +value);
   const getFrequency = () => frequency;
+  const hideType = id => { hidden.add(+id); storeHidden(); };
+  const showType = id => { hidden.delete(+id); storeHidden(); };
+  const toggleType = id => { hidden.has(+id) ? hidden.delete(+id) : hidden.add(+id); storeHidden(); };
+  const isTypeVisible = id => !hidden.has(+id);
+  const getHidden = () => Array.from(hidden);
 
   return {
     generate,
@@ -103,6 +134,11 @@ window.Resources = (function () {
     getUseIcons,
     setFrequency,
     getFrequency,
+    hideType,
+    showType,
+    toggleType,
+    isTypeVisible,
+    getHidden,
     getRandomSize
   };
 

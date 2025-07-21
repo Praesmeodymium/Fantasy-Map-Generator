@@ -7,7 +7,7 @@ function drawResources() {
   const bySize = Resources.getDisplayMode();
   const useIcons = Resources.getUseIcons();
 
-  const html = pack.resources.map(r => {
+  const html = pack.resources.filter(r => Resources.isTypeVisible(r.type)).map(r => {
     const type = Resources.getType(r.type);
     const color = type?.color || "#000";
     const name = type?.name || "Unknown";
