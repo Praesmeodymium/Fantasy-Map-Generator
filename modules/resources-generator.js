@@ -5,6 +5,7 @@ window.Resources = (function () {
   let displayBySize = false;
   let useIcons = true;
   let frequency = 0.1; // overall spawn rate multiplier
+  const hidden = new Set();
 
   // region size used to group deposits for size similarity
   const REGION = 120;
@@ -90,6 +91,11 @@ window.Resources = (function () {
   const getUseIcons = () => useIcons;
   const setFrequency = value => (frequency = +value);
   const getFrequency = () => frequency;
+  const hideType = id => hidden.add(+id);
+  const showType = id => hidden.delete(+id);
+  const toggleType = id => (hidden.has(+id) ? hidden.delete(+id) : hidden.add(+id));
+  const isTypeVisible = id => !hidden.has(+id);
+  const getHidden = () => Array.from(hidden);
 
   return {
     generate,
@@ -103,6 +109,11 @@ window.Resources = (function () {
     getUseIcons,
     setFrequency,
     getFrequency,
+    hideType,
+    showType,
+    toggleType,
+    isTypeVisible,
+    getHidden,
     getRandomSize
   };
 

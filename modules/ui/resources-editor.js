@@ -5,6 +5,7 @@ function editResources() {
   if (!layerIsOn("toggleResources")) toggleResources();
 
   const body = byId("resourcesBody");
+  const filters = byId("resourcesFilters");
   refreshResourcesEditor();
   byId("resourcesDisplaySize").checked = Resources.getDisplayMode();
   byId("resourcesUseIcons").checked = Resources.getUseIcons();
@@ -78,6 +79,23 @@ function editResources() {
     body.innerHTML = lines;
     body.querySelector("div.states")?.classList.add("selected");
     byId("resourcesFooterNumber").textContent = pack.resources.length;
+    updateFilters();
+  }
+
+  function updateFilters() {
+    const types = Resources.getTypes();
+    const checkboxes = types
+      .map(t => `<label style="margin-left:3px"><input type="checkbox" data-id="${t.id}">${t.name}</label>`)
+      .join("");
+    filters.innerHTML = checkboxes;
+    filters.querySelectorAll("input").forEach(input => {
+      input.checked = Resources.isTypeVisible(+input.dataset.id);
+      input.addEventListener("change", () => {
+        if (input.checked) Resources.showType(input.dataset.id);
+        else Resources.hideType(input.dataset.id);
+        drawResources();
+      });
+    });
   }
 
   function closeResourcesEditor() {
@@ -196,6 +214,7 @@ function editResources() {
     if (type) type.name = el.value;
     Resources.updateTypes(types);
     drawResources();
+    updateFilters();
   }
 
   function resourceChangeBase(el) {
@@ -209,6 +228,7 @@ function editResources() {
     const type = types.find(t => t.id === resource);
     if (type) type.base = val;
     Resources.updateTypes(types);
+    updateFilters();
   }
 
   function resourceChangeSize(el) {
@@ -222,6 +242,7 @@ function editResources() {
     const type = types.find(t => t.id === resource);
     if (type) type.size = val;
     Resources.updateTypes(types);
+    updateFilters();
   }
 
   function resourceChangeIcon(el) {
@@ -231,6 +252,7 @@ function editResources() {
     if (type) type.icon = el.value;
     Resources.updateTypes(types);
     drawResources();
+    updateFilters();
   }
 
   function removeCustomResource(el) {
@@ -239,6 +261,7 @@ function editResources() {
     Resources.updateTypes(types);
     refreshResourcesEditor();
     drawResources();
+    updateFilters();
   }
 
   byId("resourcesAdd").addEventListener("click", addCustomResource);
