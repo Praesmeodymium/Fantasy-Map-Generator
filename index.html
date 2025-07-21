@@ -4951,8 +4951,11 @@
       </div>
 
       <div id="resourcesEditor" class="dialog stable" style="display: none">
-        <div id="resourcesHeader" class="header" style="grid-template-columns: 13em 6em">
+        <div id="resourcesHeader" class="header" style="grid-template-columns: 1.5em 8em 5em 5em 5em">
+          <div></div>
           <div>Name&nbsp;</div>
+          <div>Base&nbsp;</div>
+          <div>Size&nbsp;</div>
           <div>Cells&nbsp;</div>
         </div>
 
@@ -4977,6 +4980,8 @@
             <button id="resourcesManuallyCancel" data-tip="Cancel assignment" class="icon-cancel"></button>
           </div>
           <button id="resourcesRegenerate" data-tip="Regenerate resources" class="icon-arrows-cw"></button>
+          <button id="resourcesAdd" data-tip="Add a custom resource" class="icon-plus"></button>
+          <label style="margin-left:5px"><input id="resourcesDisplaySize" type="checkbox"/>Display by size</label>
         </div>
       </div>
 

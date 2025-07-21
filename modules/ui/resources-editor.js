@@ -6,6 +6,7 @@ function editResources() {
 
   const body = byId("resourcesBody");
   refreshResourcesEditor();
+  byId("resourcesDisplaySize").checked = Resources.getDisplayMode();
 
   if (modules.editResources) return;
   modules.editResources = true;
@@ -28,7 +29,18 @@ function editResources() {
 
   body.addEventListener("click", ev => {
     const line = ev.target.closest("div.resources");
+    const cl = ev.target.classList;
+    if (ev.target.tagName === "FILL-BOX") resourceChangeColor(ev.target);
+    else if (cl.contains("icon-trash-empty")) removeCustomResource(ev.target);
     if (line && customization === 14) selectResourceOnLineClick(line);
+  });
+
+  body.addEventListener("change", ev => {
+    const el = ev.target;
+    const cl = el.classList;
+    if (cl.contains("resourceName")) resourceChangeName(el);
+    else if (cl.contains("resourceBase")) resourceChangeBase(el);
+    else if (cl.contains("resourceSize")) resourceChangeSize(el);
   });
 
   function refreshResourcesEditor() {
@@ -42,16 +54,21 @@ function editResources() {
     let lines = types
       .map(t => {
         const count = counts[t.id] || 0;
-        return `<div class="states resources" data-id="${t.id}" data-name="${t.name}" data-color="${t.color}" data-cells="${count}">`+
-          `<fill-box fill="${t.color}"></fill-box>`+
-          `<div class="resourceName" style="width:10em">${t.name}</div>`+
+        return `<div class="states resources" data-id="${t.id}" data-name="${t.name}" data-color="${t.color}" data-base="${t.base}" data-size="${t.size}" data-cells="${count}">`+
+          `<fill-box fill="${t.color}" class="resourceColor"></fill-box>`+
+          `<input class="resourceName" value="${t.name}" style="width:8em"/>`+
+          `<input class="resourceBase" type="number" step="0.001" value="${t.base}" style="width:4em"/>`+
+          `<input class="resourceSize" type="number" step="1" min="1" value="${t.size}" style="width:4em"/>`+
           `<div data-tip="Cells count" class="resourceCells">${count}</div>`+
+          `${t.custom ? '<span data-tip="Remove the custom resource" class="icon-trash-empty"></span>' : ''}`+
           `</div>`;
       })
       .join("");
-    lines += `<div class="states resources" data-id="0" data-name="None" data-color="#eee" data-cells="0">`+
-             `<fill-box fill="#eee"></fill-box>`+
-             `<div class="resourceName" style="width:10em">None</div>`+
+    lines += `<div class="states resources" data-id="0" data-name="None" data-color="#eee" data-base="0" data-size="1" data-cells="0">`+
+             `<fill-box fill="#eee" class="resourceColor"></fill-box>`+
+             `<div class="resourceName" style="width:8em">None</div>`+
+             `<input class="resourceBase" type="number" step="0.001" value="0" style="width:4em"/>`+
+             `<input class="resourceSize" type="number" step="1" min="1" value="1" style="width:4em"/>`+
              `<div class="resourceCells">0</div></div>`;
     body.innerHTML = lines;
     body.querySelector("div.states")?.classList.add("selected");
@@ -127,7 +144,8 @@ function editResources() {
       if (typeId) {
         const [x, y] = pack.cells.p[i];
         const id = last(pack.resources)?.i + 1 || 1;
-        pack.resources.push({i: id, type: typeId, x: rn(x,2), y: rn(y,2), cell: i});
+        const size = Resources.getType(typeId).size || 1;
+        pack.resources.push({i: id, type: typeId, x: rn(x,2), y: rn(y,2), cell: i, size});
       }
     });
     drawResources();
@@ -148,5 +166,79 @@ function editResources() {
     resourcesFooter.style.display = "block";
     restoreDefaultEvents();
     clearMainTip();
+  }
+
+  function resourceChangeColor(el) {
+    const resource = +el.parentNode.dataset.id;
+    const currentFill = el.getAttribute("fill");
+    const callback = newFill => {
+      el.fill = newFill;
+      el.setAttribute("fill", newFill);
+      const types = Resources.getTypes();
+      const type = types.find(t => t.id === resource);
+      if (type) type.color = newFill;
+      Resources.updateTypes(types);
+      drawResources();
+    };
+    openPicker(currentFill, callback);
+  }
+
+  function resourceChangeName(el) {
+    const resource = +el.parentNode.dataset.id;
+    const types = Resources.getTypes();
+    const type = types.find(t => t.id === resource);
+    if (type) type.name = el.value;
+    Resources.updateTypes(types);
+    drawResources();
+  }
+
+  function resourceChangeBase(el) {
+    const resource = +el.parentNode.dataset.id;
+    const val = +el.value;
+    if (isNaN(val) || val < 0) {
+      el.value = Resources.getType(resource).base;
+      return tip("Please provide a valid base weight", false, "error");
+    }
+    const types = Resources.getTypes();
+    const type = types.find(t => t.id === resource);
+    if (type) type.base = val;
+    Resources.updateTypes(types);
+  }
+
+  function resourceChangeSize(el) {
+    const resource = +el.parentNode.dataset.id;
+    const val = +el.value;
+    if (isNaN(val) || val < 1) {
+      el.value = Resources.getType(resource).size;
+      return tip("Please provide a valid size", false, "error");
+    }
+    const types = Resources.getTypes();
+    const type = types.find(t => t.id === resource);
+    if (type) type.size = val;
+    Resources.updateTypes(types);
+  }
+
+  function removeCustomResource(el) {
+    const resource = +el.parentNode.dataset.id;
+    const types = Resources.getTypes().filter(t => t.id !== resource);
+    Resources.updateTypes(types);
+    refreshResourcesEditor();
+    drawResources();
+  }
+
+  byId("resourcesAdd").addEventListener("click", addCustomResource);
+  byId("resourcesDisplaySize").addEventListener("change", () => {
+    Resources.setDisplayMode(byId("resourcesDisplaySize").checked);
+    drawResources();
+  });
+
+  function addCustomResource() {
+    const types = Resources.getTypes();
+    if (types.length >= 32)
+      return tip("Maximum number of resources reached (32)", false, "error");
+    const id = types.reduce((m, t) => Math.max(m, t.id), 0) + 1;
+    types.push({id, name: "Custom", color: getRandomColor(), base: 0.01, size: 1, type: "custom", custom: true});
+    Resources.updateTypes(types);
+    refreshResourcesEditor();
   }
 }

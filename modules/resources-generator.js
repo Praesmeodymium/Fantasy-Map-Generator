@@ -2,6 +2,7 @@
 
 window.Resources = (function () {
   let types = [];
+  let displayBySize = false;
 
   async function loadConfig() {
     if (types.length) return types;
@@ -19,9 +20,10 @@ window.Resources = (function () {
     const {cells} = pack;
     pack.resources = [];
     cells.resource = new Uint8Array(cells.i.length);
+    const used = new Set();
     let id = 0;
     for (const i of cells.i) {
-      if (cells.h[i] < 20) continue; // ignore water
+      if (cells.h[i] < 20 || used.has(i)) continue; // ignore water
       const height = cells.h[i];
       const biome = cells.biome[i];
       const weights = types.map(t => {
@@ -44,9 +46,15 @@ window.Resources = (function () {
       }
       if (resIndex === -1) continue;
       const type = types[resIndex];
-      cells.resource[i] = type.id;
+      const size = type.size || 1;
       const [x, y] = cells.p[i];
-      pack.resources.push({i: ++id, type: type.id, x: rn(x, 2), y: rn(y, 2), cell: i});
+      const affected = size > 1 ? findAll(x, y, size) : [i];
+      affected.forEach(c => {
+        if (cells.h[c] < 20 || used.has(c)) return;
+        cells.resource[c] = type.id;
+        used.add(c);
+      });
+      pack.resources.push({i: ++id, type: type.id, x: rn(x, 2), y: rn(y, 2), cell: i, size});
     }
   }
   async function regenerate() {
@@ -56,7 +64,10 @@ window.Resources = (function () {
 
   const getType = id => types.find(t => t.id === id);
   const getTypes = () => types.slice();
+  const updateTypes = t => (types = t.slice());
+  const setDisplayMode = value => (displayBySize = value);
+  const getDisplayMode = () => displayBySize;
 
-  return {generate, regenerate, getType, getTypes};
+  return {generate, regenerate, getType, getTypes, updateTypes, setDisplayMode, getDisplayMode};
 
 })();
