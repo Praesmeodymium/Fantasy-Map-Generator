@@ -228,7 +228,7 @@ window.Markers = (function () {
   function addMine(id, cell) {
     const {cells} = pack;
 
-    const resources = {salt: 5, gold: 2, silver: 4, copper: 2, iron: 3, lead: 1, tin: 1};
+    const resources = {salt: 5, clay: 4, limestone: 3, sandstone: 2, coal: 4, tin: 1, copper: 2, iron: 3, lead: 1, silver: 2, gold: 1, gems: 1, sulfur: 1, saltpeter: 1, "Magical Timbers": 1};
     const resource = rw(resources);
     const burg = pack.burgs[cells.burg[cell]];
     const name = `${burg.name} — ${resource} mining town`;

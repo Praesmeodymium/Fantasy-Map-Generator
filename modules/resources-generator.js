@@ -48,6 +48,11 @@ window.Resources = (function () {
         if (t.type === "metal" && height > 60) w *= 3;
         if (t.type === "fuel" && height < 60 && [3,4,5,7,8,9,12].includes(biome)) w *= 2;
         if (t.type === "magic" && height > 70) w *= 5;
+        if (t.type === "building" && height < 60) w *= 2;
+        if (t.type === "building" && cells.pop[i]) w *= 1 + cells.pop[i] / 20;
+        if (t.type === "organic" && [5,6,7,8,9].includes(biome)) w *= 2;
+        if (t.type === "mineral" && [1,2,12].includes(biome)) w *= 2;
+        if (t.type === "gem" && height > 70) w *= 3;
         return w;
       });
       const total = weights.reduce((a, b) => a + b, 0);
