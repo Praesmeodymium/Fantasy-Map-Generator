@@ -166,7 +166,8 @@ function editResources() {
         const id = last(pack.resources)?.i + 1 || 1;
         const type = Resources.getType(typeId);
         const size = Resources.getRandomSize(type, x, y);
-        pack.resources.push({i: id, type: typeId, x: rn(x,2), y: rn(y,2), cell: i, size});
+        const tons = Resources.getDepositTons(type, x, y);
+        pack.resources.push({i: id, type: typeId, x: rn(x,2), y: rn(y,2), cell: i, size, tons});
       }
     });
     drawResources();
