@@ -17,7 +17,8 @@ function drawResources() {
       const tons = r.tons || 1;
       const tipText = `${name}: ${tons.toLocaleString()} tons`;
 
-      const radius = bySize ? getRenderRadius(tons, scale) : 3;
+      // radius should not depend on current zoom when redrawn
+      const radius = bySize ? getRenderRadius(tons, 1) : 3;
       const labelSize = Math.max(radius * 1.5, 8);
 
       if (bySize || !useIcons || !type?.icon) {
