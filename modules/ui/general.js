@@ -122,7 +122,10 @@ function showMapTooltip(point, e, i, g) {
 
   // specific elements
   if (group === "resources") {
-    const resId = +e.target.id.slice(8);
+    // event target may be a child element without an id
+    let el = e.target;
+    while (el && (!el.id || !el.id.startsWith("resource"))) el = el.parentNode;
+    const resId = el ? +el.id.replace("resource", "") : NaN;
     const res = pack.resources.find(r => r.i === resId);
     if (res) {
       const type = Resources.getType(res.type);
