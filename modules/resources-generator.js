@@ -42,9 +42,89 @@ window.Resources = (function () {
     return types;
   }
 
+  function computeTectonicZones() {
+    const {cells} = pack;
+    if (cells.tectonic) return cells.tectonic;
+    cells.tectonic = new Uint8Array(cells.i.length);
+    for (const i of cells.i) {
+      if (cells.h[i] < 20) continue;
+      const neighbors = cells.c[i];
+      if (!neighbors.length) continue;
+      const h = cells.h[i];
+      const avg = d3.mean(neighbors.map(n => cells.h[n]));
+      const maxDiff = d3.max(neighbors.map(n => Math.abs(cells.h[n] - h)));
+      if (maxDiff > 15) {
+        if (h - avg > 5) cells.tectonic[i] = 3; // compression / uplift
+        else if (avg - h > 5) cells.tectonic[i] = 2; // rift / depression
+        else cells.tectonic[i] = 1; // active
+      } else {
+        cells.tectonic[i] = 0; // stable
+      }
+    }
+    return cells.tectonic;
+  }
+
+  function getResourceWeight(resource, height, biome, pop = 0, tectonic = 0) {
+    let weight = resource.base || 0;
+    if (!weight) return 0;
+
+    const isMountain = height > 60;
+    const isExtreme = height > 75;
+    const isLowland = height < 40;
+    const isDesert = [1, 2].includes(biome);
+    const isForest = [5, 6, 7, 8].includes(biome);
+    const isWetland = biome === 12;
+    const isRiverValley = isWetland;
+    const isSedimentary = isLowland && tectonic === 0;
+    const isActive = tectonic === 1 || tectonic === 3;
+    const isRift = tectonic === 2;
+    const isCompression = tectonic === 3;
+
+    switch (resource.type) {
+      case "metal":
+        if (isMountain) weight *= 3;
+        if (isActive) weight *= 2;
+        break;
+      case "fuel":
+        if (isSedimentary) weight *= 2;
+        if (resource.name === "Oil") {
+          if (isDesert) weight *= 3;
+          if (isCompression) weight *= 3;
+        }
+        break;
+      case "mineral":
+        if (resource.name === "Salt") {
+          if (isDesert || isSedimentary) weight *= 3;
+        } else if (resource.name === "Sulfur") {
+          if (isActive || isRift) weight *= 3;
+        } else if (resource.name === "Saltpeter") {
+          if (isDesert) weight *= 2;
+        }
+        break;
+      case "gem":
+        if (isMountain || isRift) weight *= 3;
+        if (isRiverValley) weight *= 2;
+        break;
+      case "magic":
+        if (isExtreme) weight *= 5;
+        if (isRift) weight *= 3;
+        break;
+      case "building":
+        if (isLowland) weight *= 2;
+        if (pop > 0) weight *= 1.5;
+        break;
+      case "organic":
+        if (isForest || isWetland) weight *= 3;
+        break;
+    }
+
+    return weight;
+  }
+
   async function generate() {
     await loadConfig();
     const {cells} = pack;
+    const tectonicMap = computeTectonicZones();
     pack.resources = [];
     cells.resource = new Uint8Array(cells.i.length);
     const used = new Set();
@@ -53,18 +133,9 @@ window.Resources = (function () {
       if (cells.h[i] < 20 || used.has(i)) continue; // ignore water
       const height = cells.h[i];
       const biome = cells.biome[i];
-      const weights = types.map(t => {
-        let w = t.base || 0;
-        if (t.type === "metal" && height > 60) w *= 3;
-        if (t.type === "fuel" && height < 60 && [3,4,5,7,8,9,12].includes(biome)) w *= 2;
-        if (t.type === "magic" && height > 70) w *= 5;
-        if (t.type === "building" && height < 60) w *= 2;
-        if (t.type === "building" && cells.pop && cells.pop[i]) w *= 1 + cells.pop[i] / 20;
-        if (t.type === "organic" && [5,6,7,8,9].includes(biome)) w *= 2;
-        if (t.type === "mineral" && [1,2,12].includes(biome)) w *= 2;
-        if (t.type === "gem" && height > 70) w *= 3;
-        return w;
-      });
+      const pop = cells.pop ? cells.pop[i] : 0;
+      const tectonic = tectonicMap[i];
+      const weights = types.map(t => getResourceWeight(t, height, biome, pop, tectonic));
       const total = weights.reduce((a, b) => a + b, 0);
       if (Math.random() >= total * frequency) continue;
       let r = Math.random() * total;
@@ -129,7 +200,8 @@ window.Resources = (function () {
     toggleType,
     isTypeVisible,
     getHidden,
-    getRandomSize
+    getRandomSize,
+    getResourceWeight
   };
 
 })();
