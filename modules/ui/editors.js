@@ -31,6 +31,7 @@ function clicked() {
   else if (grand.id === "markers" || great.id === "markers") editMarker();
   else if (grand.id === "coastline") editCoastline();
   else if (grand.id === "lakes") editLake();
+  else if (grand.id === "resources") editResourceSpot(el.id);
   else if (great.id === "armies") editRegiment();
 }
 

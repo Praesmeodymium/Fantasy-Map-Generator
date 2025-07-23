@@ -121,6 +121,20 @@ function showMapTooltip(point, e, i, g) {
   const land = pack.cells.h[i] >= 20;
 
   // specific elements
+  if (group === "resources") {
+    const resId = +e.target.id.slice(8);
+    const res = pack.resources.find(r => r.i === resId);
+    if (res) {
+      const type = Resources.getType(res.type);
+      const name = type?.name || "Unknown";
+      const tipText = `${name}: ${res.tons.toLocaleString()} tons`;
+      tip(tipText + ". Click to edit");
+      const editor = byId("resourcesEditor");
+      if (editor?.offsetParent) highlightEditorLine(editor, res.type, 5000);
+    }
+    return;
+  }
+
   if (group === "armies") return tip(e.target.parentNode.dataset.name + ". Click to edit");
 
   if (group === "emblems" && e.target.tagName === "use") {
