@@ -298,3 +298,20 @@ function editResources() {
     refreshResourcesEditor();
   }
 }
+
+function editResourceSpot(id) {
+  if (customization) return;
+  const resId = +id.replace("resource", "");
+  const resource = pack.resources.find(r => r.i === resId);
+  if (!resource) return;
+  editResources();
+  setTimeout(() => {
+    const body = byId("resourcesBody");
+    const line = body.querySelector(`div[data-id='${resource.type}']`);
+    if (line) {
+      body.querySelectorAll("div.selected").forEach(el => el.classList.remove("selected"));
+      line.classList.add("selected");
+      line.scrollIntoView({block: "center"});
+    }
+  });
+}
