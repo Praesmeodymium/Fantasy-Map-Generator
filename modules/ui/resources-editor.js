@@ -10,6 +10,7 @@ function editResources() {
   byId("resourcesDisplaySize").checked = Resources.getDisplayMode();
   byId("resourcesUseIcons").checked = Resources.getUseIcons();
   byId("resourcesFrequency").value = Resources.getFrequency();
+  byId("showHiddenResources").checked = Resources.getShowHidden();
 
   if (modules.editResources) return;
   modules.editResources = true;
@@ -170,7 +171,7 @@ function editResources() {
         pack.resources.push({i: id, type: typeId, x: rn(x,2), y: rn(y,2), cell: i, size, tons});
       }
     });
-    drawResources();
+    drawResources(Resources.getShowHidden());
   }
 
   function applyResourcesManualAssign() {
@@ -200,7 +201,7 @@ function editResources() {
       const type = types.find(t => t.id === resource);
       if (type) type.color = newFill;
       Resources.updateTypes(types);
-      drawResources();
+      drawResources(Resources.getShowHidden());
     };
     openPicker(currentFill, callback);
   }
@@ -211,7 +212,7 @@ function editResources() {
     const type = types.find(t => t.id === resource);
     if (type) type.name = el.value;
     Resources.updateTypes(types);
-    drawResources();
+    drawResources(Resources.getShowHidden());
     updateFilters();
   }
 
@@ -249,7 +250,7 @@ function editResources() {
     const type = types.find(t => t.id === resource);
     if (type) type.icon = el.value;
     Resources.updateTypes(types);
-    drawResources();
+    drawResources(Resources.getShowHidden());
     updateFilters();
   }
 
@@ -257,7 +258,7 @@ function editResources() {
     const resource = +el.parentNode.dataset.id;
     if (el.checked) Resources.showType(resource);
     else Resources.hideType(resource);
-    drawResources();
+    drawResources(Resources.getShowHidden());
   }
 
   function removeCustomResource(el) {
@@ -265,18 +266,18 @@ function editResources() {
     const types = Resources.getTypes().filter(t => t.id !== resource);
     Resources.updateTypes(types);
     refreshResourcesEditor();
-    drawResources();
+    drawResources(Resources.getShowHidden());
     updateFilters();
   }
 
   byId("resourcesAdd").addEventListener("click", addCustomResource);
   byId("resourcesDisplaySize").addEventListener("change", () => {
     Resources.setDisplayMode(byId("resourcesDisplaySize").checked);
-    drawResources();
+    drawResources(Resources.getShowHidden());
   });
   byId("resourcesUseIcons").addEventListener("change", () => {
     Resources.setUseIcons(byId("resourcesUseIcons").checked);
-    drawResources();
+    drawResources(Resources.getShowHidden());
   });
   byId("resourcesFrequency").addEventListener("change", () => {
     const val = +byId("resourcesFrequency").value;
@@ -286,6 +287,10 @@ function editResources() {
     }
     Resources.setFrequency(val);
     regenerateResources();
+  });
+  byId("showHiddenResources").addEventListener("change", () => {
+    Resources.setShowHidden(byId("showHiddenResources").checked);
+    drawResources(Resources.getShowHidden());
   });
 
   function addCustomResource() {

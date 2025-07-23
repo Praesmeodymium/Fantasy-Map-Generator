@@ -873,7 +873,7 @@ function toggleMarkers(event) {
 function toggleResources(event) {
   if (!layerIsOn("toggleResources")) {
     turnButtonOn("toggleResources");
-    drawResources();
+    drawResources(Resources.getShowHidden());
     if (event && isCtrlClick(event)) editStyle("resources");
   } else {
     if (event && isCtrlClick(event)) return editStyle("resources");
