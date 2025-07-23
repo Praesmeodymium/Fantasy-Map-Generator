@@ -25,6 +25,11 @@ window.Resources = (function () {
     return Math.max(1, Math.round(base * factor));
   }
 
+  function getDepositTons(type, x, y) {
+    const r = regionRandom(x, y, type.id + "_tons");
+    return getDepositSize(type.name, r);
+  }
+
   async function loadConfig() {
     if (types.length) return types;
     const stored = JSON.safeParse(localStorage.getItem(STORAGE_KEY));
@@ -151,13 +156,14 @@ window.Resources = (function () {
       const type = types[resIndex];
       const [x, y] = cells.p[i];
       const size = getRandomSize(type, x, y);
+      const tons = getDepositTons(type, x, y);
       const affected = size > 1 ? findAll(x, y, size) : [i];
       affected.forEach(c => {
         if (cells.h[c] < 20 || used.has(c)) return;
         cells.resource[c] = type.id;
         used.add(c);
       });
-      pack.resources.push({i: ++id, type: type.id, x: rn(x, 2), y: rn(y, 2), cell: i, size});
+      pack.resources.push({i: ++id, type: type.id, x: rn(x, 2), y: rn(y, 2), cell: i, size, tons});
     }
   }
   async function regenerate() {
@@ -201,6 +207,7 @@ window.Resources = (function () {
     isTypeVisible,
     getHidden,
     getRandomSize,
+    getDepositTons,
     getResourceWeight
   };
 

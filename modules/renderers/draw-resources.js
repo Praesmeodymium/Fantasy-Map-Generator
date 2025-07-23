@@ -13,8 +13,9 @@ function drawResources() {
     const name = type?.name || "Unknown";
 
     if (bySize || !useIcons || !type?.icon) {
-      const size = bySize ? (r.size || 1) * 3 : 3;
-      return `<circle id="resource${r.i}" cx="${r.x}" cy="${r.y}" r="${size}" fill="${color}" data-tip="${name}" />`;
+      const tons = r.tons || 1;
+      const radius = bySize ? getRenderRadius(tons, scale) : 3;
+      return `<circle id="resource${r.i}" cx="${r.x}" cy="${r.y}" r="${radius}" fill="${color}" data-tip="${name}" />`;
     }
 
     const icon = type.icon;
