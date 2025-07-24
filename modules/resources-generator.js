@@ -41,6 +41,8 @@ window.Resources = (function () {
     cells.visibleResource = new Uint8Array(cells.i.length);
     cells.hiddenDeposit = new Uint16Array(cells.i.length);
     cells.visibleDeposit = new Uint16Array(cells.i.length);
+    // create empty resources map for new worlds
+    cells.resource = new Uint8Array(cells.i.length);
     pack.hiddenResources = [];
     pack.resources = [];
     const used = new Set();
@@ -105,6 +107,8 @@ window.Resources = (function () {
           cells.hiddenDeposit[c] = 0;
           cells.visibleResource[c] = typeId;
           cells.visibleDeposit[c] = dep.i;
+          // update general resource layer
+          cells.resource[c] = typeId;
         });
         if (!resources.some(r => r.i === dep.i)) resources.push(dep);
       });
