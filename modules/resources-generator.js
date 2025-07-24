@@ -33,6 +33,7 @@ window.Resources = (function () {
   }
 
   async function generateHiddenResources() {
+    if (pack.hiddenResources?.length || pack.resources?.length) return; // already generated
     await loadConfig();
     const {cells} = pack;
     const tectonicMap = computeTectonicZones();
@@ -105,7 +106,7 @@ window.Resources = (function () {
           cells.visibleResource[c] = typeId;
           cells.visibleDeposit[c] = dep.i;
         });
-        resources.push(dep);
+        if (!resources.some(r => r.i === dep.i)) resources.push(dep);
       });
     }
     if (window.drawResources) drawResources(showHiddenResources);
