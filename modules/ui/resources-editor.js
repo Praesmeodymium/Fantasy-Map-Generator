@@ -9,6 +9,7 @@ function editResources() {
   const showAllCheckbox = byId("resourcesShowAll");
   let showAll = false;
   refreshResourcesEditor();
+  drawResources(showAll);
   byId("resourcesDisplaySize").checked = Resources.getDisplayMode();
   byId("resourcesUseIcons").checked = Resources.getUseIcons();
   byId("resourcesFrequency").value = Resources.getFrequency();
@@ -32,6 +33,7 @@ function editResources() {
   showAllCheckbox.addEventListener("change", () => {
     showAll = showAllCheckbox.checked;
     refreshResourcesEditor();
+    drawResources(showAll);
   });
   byId("resourcesManually").addEventListener("click", enterResourcesManualAssign);
   byId("resourcesManuallyApply").addEventListener("click", applyResourcesManualAssign);
@@ -88,11 +90,12 @@ function editResources() {
              `<input class="resourceBase" type="number" step="0.001" value="0" style="width:4em"/>`+
              `<input class="resourceSize" type="number" step="1" min="1" value="1" style="width:4em"/>`+
              `<div class="resourceCells">0</div></div>`;
-    body.innerHTML = lines;
-    body.querySelector("div.states")?.classList.add("selected");
-    byId("resourcesFooterNumber").textContent = pack.resources.length;
-    updateFilters();
-  }
+  body.innerHTML = lines;
+  body.querySelector("div.states")?.classList.add("selected");
+  byId("resourcesFooterNumber").textContent = pack.resources.length;
+  updateFilters();
+  drawResources(showAll);
+}
 
   function updateFilters() {
     body.querySelectorAll("div.states.resources").forEach(line => {
@@ -122,6 +125,7 @@ function editResources() {
     Resources.regenerate().then(() => {
       Resources.discoverAroundBurgs();
       refreshResourcesEditor();
+      drawResources(showAll);
     });
   }
 
@@ -180,7 +184,7 @@ function editResources() {
         pack.resources.push({i: id, type: typeId, x: rn(x,2), y: rn(y,2), cell: i, size, tons});
       }
     });
-    drawResources();
+    drawResources(showAll);
   }
 
   function applyResourcesManualAssign() {
@@ -210,7 +214,7 @@ function editResources() {
       const type = types.find(t => t.id === resource);
       if (type) type.color = newFill;
       Resources.updateTypes(types);
-      drawResources();
+      drawResources(showAll);
     };
     openPicker(currentFill, callback);
   }
@@ -221,7 +225,7 @@ function editResources() {
     const type = types.find(t => t.id === resource);
     if (type) type.name = el.value;
     Resources.updateTypes(types);
-    drawResources();
+    drawResources(showAll);
     updateFilters();
   }
 
@@ -259,7 +263,7 @@ function editResources() {
     const type = types.find(t => t.id === resource);
     if (type) type.icon = el.value;
     Resources.updateTypes(types);
-    drawResources();
+    drawResources(showAll);
     updateFilters();
   }
 
@@ -267,7 +271,7 @@ function editResources() {
     const resource = +el.parentNode.dataset.id;
     if (el.checked) Resources.showType(resource);
     else Resources.hideType(resource);
-    drawResources();
+    drawResources(showAll);
   }
 
   function removeCustomResource(el) {
@@ -275,18 +279,18 @@ function editResources() {
     const types = Resources.getTypes().filter(t => t.id !== resource);
     Resources.updateTypes(types);
     refreshResourcesEditor();
-    drawResources();
+    drawResources(showAll);
     updateFilters();
   }
 
   byId("resourcesAdd").addEventListener("click", addCustomResource);
   byId("resourcesDisplaySize").addEventListener("change", () => {
     Resources.setDisplayMode(byId("resourcesDisplaySize").checked);
-    drawResources();
+    drawResources(showAll);
   });
   byId("resourcesUseIcons").addEventListener("change", () => {
     Resources.setUseIcons(byId("resourcesUseIcons").checked);
-    drawResources();
+    drawResources(showAll);
   });
   byId("resourcesFrequency").addEventListener("change", () => {
     const val = +byId("resourcesFrequency").value;
