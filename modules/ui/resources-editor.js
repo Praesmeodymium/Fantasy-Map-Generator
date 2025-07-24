@@ -119,7 +119,10 @@ function editResources() {
   }
 
   function regenerateResources() {
-    Resources.regenerate().then(refreshResourcesEditor);
+    Resources.regenerate().then(() => {
+      Resources.discoverAroundBurgs();
+      refreshResourcesEditor();
+    });
   }
 
   function enterResourcesManualAssign() {
