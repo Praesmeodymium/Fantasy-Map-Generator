@@ -1,6 +1,6 @@
 "use strict";
 
-function drawResources() {
+function drawResources(showHidden = false) {
   TIME && console.time("drawResources");
   resources.selectAll("*").remove();
 
@@ -9,7 +9,7 @@ function drawResources() {
   const tooltipSupported = !MOBILE && document.getElementById("tooltip");
 
   const html = pack.resources
-    .filter(r => r.visible)
+    .filter(r => showHidden || r.visible)
     .filter(r => Resources.isTypeVisible(r.type))
     .map(r => {
       const type = Resources.getType(r.type);
