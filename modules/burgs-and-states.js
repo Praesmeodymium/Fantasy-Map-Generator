@@ -377,11 +377,6 @@ window.BurgsAndStates = (() => {
     }
 
     TIME && console.timeEnd("expandStates");
-    if (pack.cells.hiddenResource) {
-      states.forEach(s => {
-        if (s.i && !s.removed) Resources.revealResourcesForCiv(s.i);
-      });
-    }
   };
 
   const normalizeStates = () => {

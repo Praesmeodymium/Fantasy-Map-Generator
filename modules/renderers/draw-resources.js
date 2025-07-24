@@ -1,9 +1,8 @@
 "use strict";
 
-function drawResources(showHidden = Resources.getShowHidden()) {
+function drawResources() {
   TIME && console.time("drawResources");
   resources.selectAll("*").remove();
-  hiddenResources?.selectAll("*").remove();
 
   const bySize = Resources.getDisplayMode();
   const useIcons = Resources.getUseIcons();
@@ -53,22 +52,5 @@ function drawResources(showHidden = Resources.getShowHidden()) {
     });
 
   resources.html(html.join(""));
-
-  if (showHidden && pack.hiddenResources) {
-    const hiddenHtml = pack.hiddenResources
-      .filter(r => Resources.isTypeVisible(r.type))
-      .map(r => {
-        const type = Resources.getType(r.type);
-        const color = type?.color || "#000";
-        const tons = r.tons || 1;
-        const radius = bySize ? getRenderRadius(tons, 1) * 0.6 : 2;
-        const opacity = 0.5;
-        return `<circle cx="${r.x}" cy="${r.y}" r="${radius}" fill="${color}" opacity="${opacity}" />`;
-      });
-    hiddenResources.html(hiddenHtml.join(""));
-    hiddenResources.style("display", null);
-  } else {
-    hiddenResources?.style("display", "none");
-  }
   TIME && console.timeEnd("drawResources");
 }

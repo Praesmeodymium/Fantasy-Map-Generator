@@ -84,7 +84,6 @@ let anchors = icons.append("g").attr("id", "anchors");
 let armies = viewbox.append("g").attr("id", "armies");
 let markers = viewbox.append("g").attr("id", "markers");
 let resources = viewbox.append("g").attr("id", "resources");
-let hiddenResources = viewbox.append("g").attr("id", "hiddenResources").style("display","none");
 let fogging = viewbox
   .append("g")
   .attr("id", "fogging-cont")
@@ -649,7 +648,7 @@ async function generate(options) {
     Rivers.generate();
     Biomes.define();
 
-    await Resources.generateHiddenResources();
+    await Resources.generate(); // generate resources before ranking cells so cultures can form around them
 
     rankCells();
     Cultures.generate();
