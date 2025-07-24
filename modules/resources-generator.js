@@ -6,7 +6,6 @@ window.Resources = (function () {
   let displayBySize = false;
   let useIcons = true;
   let frequency = 0.1; // overall spawn rate multiplier
-  let showHiddenResources = false;
   const hidden = new Set();
 
   // region size used to group deposits for size similarity
@@ -21,99 +20,14 @@ window.Resources = (function () {
 
   function getRandomSize(type, x, y) {
     const base = type.size || 1;
-    const r1 = regionRandom(x, y, type.id);
-    const r2 = regionRandom(x, y, type.id + "_size");
-    const factor = 0.8 + r1 * 0.4 + r2 * 0.2;
+    const r = regionRandom(x, y, type.id);
+    const factor = 0.8 + r * 0.4 + Math.random() * 0.2;
     return Math.max(1, Math.round(base * factor));
   }
 
   function getDepositTons(type, x, y) {
     const r = regionRandom(x, y, type.id + "_tons");
     return getDepositSize(type.name, r);
-  }
-
-  async function generateHiddenResources() {
-    if (pack.hiddenResources?.length || pack.resources?.length) return; // already generated
-    await loadConfig();
-    const {cells} = pack;
-    const tectonicMap = computeTectonicZones();
-    cells.hiddenResource = new Uint8Array(cells.i.length);
-    cells.visibleResource = new Uint8Array(cells.i.length);
-    cells.hiddenDeposit = new Uint16Array(cells.i.length);
-    cells.visibleDeposit = new Uint16Array(cells.i.length);
-    // create empty resources map for new worlds
-    cells.resource = new Uint8Array(cells.i.length);
-    pack.hiddenResources = [];
-    pack.resources = [];
-    const used = new Set();
-    let id = 0;
-    for (const i of cells.i) {
-      if (cells.h[i] < 20 || used.has(i)) continue;
-      const height = cells.h[i];
-      const biome = cells.biome[i];
-      const pop = cells.pop ? cells.pop[i] : 0;
-      const tectonic = tectonicMap[i];
-      const weights = types.map(t => getResourceWeight(t, height, biome, pop, tectonic));
-      const total = weights.reduce((a, b) => a + b, 0);
-      const presence = regionRandom(cells.p[i][0], cells.p[i][1], "res_presence");
-      if (presence >= total * frequency) continue;
-      let r = regionRandom(cells.p[i][0], cells.p[i][1], "res_type") * total;
-      let resIndex = -1;
-      for (let j = 0; j < weights.length; j++) {
-        r -= weights[j];
-        if (r <= 0) {
-          resIndex = j;
-          break;
-        }
-      }
-      if (resIndex === -1) continue;
-      const type = types[resIndex];
-      const [x, y] = cells.p[i];
-      const size = getRandomSize(type, x, y);
-      const tons = getDepositTons(type, x, y);
-      const affected = size > 1 ? findAll(x, y, size) : [i];
-      const depositId = ++id;
-      affected.forEach(c => {
-        if (cells.h[c] < 20 || used.has(c)) return;
-        cells.hiddenResource[c] = type.id;
-        cells.hiddenDeposit[c] = depositId;
-        used.add(c);
-      });
-      pack.hiddenResources.push({i: depositId, type: type.id, x: rn(x, 2), y: rn(y, 2), cell: i, size, tons});
-    }
-  }
-
-  function revealResourcesForCiv(civId) {
-    const {cells, hiddenResources, resources, states} = pack;
-    if (!cells.hiddenResource) return;
-    for (const i of cells.i) {
-      if (cells.state[i] !== civId) continue;
-      const [x, y] = cells.p[i];
-      const neighbors = findAll(x, y, 2);
-      neighbors.forEach(n => {
-        const typeId = cells.hiddenResource[n];
-        if (!typeId || cells.visibleResource[n]) return;
-        let chance = 0.1 * (states[civId]?.expansionism || 1);
-        if (cells.h[n] > 50) chance += 0.2;
-        if (Math.random() > chance) return;
-        const depId = cells.hiddenDeposit[n];
-        const index = hiddenResources.findIndex(r => r.i === depId);
-        if (index === -1) return;
-        const dep = hiddenResources.splice(index, 1)[0];
-        const affected = dep.size > 1 ? findAll(dep.x, dep.y, dep.size) : [dep.cell];
-        affected.forEach(c => {
-          if (cells.hiddenDeposit[c] !== depId) return;
-          cells.hiddenResource[c] = 0;
-          cells.hiddenDeposit[c] = 0;
-          cells.visibleResource[c] = typeId;
-          cells.visibleDeposit[c] = dep.i;
-          // update general resource layer
-          cells.resource[c] = typeId;
-        });
-        if (!resources.some(r => r.i === dep.i)) resources.push(dep);
-      });
-    }
-    if (window.drawResources) drawResources(showHiddenResources);
   }
 
   async function loadConfig() {
@@ -254,7 +168,7 @@ window.Resources = (function () {
   }
   async function regenerate() {
     await generate();
-    if (window.drawResources) drawResources(showHiddenResources);
+    if (window.drawResources) drawResources();
   }
 
   const getType = id => types.find(t => t.id === id);
@@ -269,8 +183,6 @@ window.Resources = (function () {
   const getUseIcons = () => useIcons;
   const setFrequency = value => (frequency = +value);
   const getFrequency = () => frequency;
-  const setShowHidden = value => (showHiddenResources = value);
-  const getShowHidden = () => showHiddenResources;
   const hideType = id => hidden.add(+id);
   const showType = id => hidden.delete(+id);
   const toggleType = id => (hidden.has(+id) ? hidden.delete(+id) : hidden.add(+id));
@@ -280,8 +192,6 @@ window.Resources = (function () {
   return {
     generate,
     regenerate,
-    generateHiddenResources,
-    revealResourcesForCiv,
     getType,
     getTypes,
     updateTypes,
@@ -291,8 +201,6 @@ window.Resources = (function () {
     getUseIcons,
     setFrequency,
     getFrequency,
-    setShowHidden,
-    getShowHidden,
     hideType,
     showType,
     toggleType,
