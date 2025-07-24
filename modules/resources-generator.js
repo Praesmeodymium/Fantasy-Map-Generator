@@ -54,7 +54,7 @@ window.Resources = (function () {
       const weights = types.map(t => getResourceWeight(t, height, biome, pop, tectonic));
       const total = weights.reduce((a, b) => a + b, 0);
       const presence = regionRandom(cells.p[i][0], cells.p[i][1], "res_presence");
-      if (presence >= total) continue;
+      if (presence >= total * frequency) continue;
       let r = regionRandom(cells.p[i][0], cells.p[i][1], "res_type") * total;
       let resIndex = -1;
       for (let j = 0; j < weights.length; j++) {
