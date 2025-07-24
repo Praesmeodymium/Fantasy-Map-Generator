@@ -6,10 +6,13 @@ function editResources() {
 
   const body = byId("resourcesBody");
   const filters = byId("resourcesFilters");
+  const showAllCheckbox = byId("resourcesShowAll");
+  let showAll = false;
   refreshResourcesEditor();
   byId("resourcesDisplaySize").checked = Resources.getDisplayMode();
   byId("resourcesUseIcons").checked = Resources.getUseIcons();
   byId("resourcesFrequency").value = Resources.getFrequency();
+  showAllCheckbox.checked = showAll;
 
   if (modules.editResources) return;
   modules.editResources = true;
@@ -26,6 +29,10 @@ function editResources() {
   byId("resourcesEditStyle").addEventListener("click", () => editStyle("resources"));
   byId("resourcesLegend").addEventListener("click", toggleLegend);
   byId("resourcesRegenerate").addEventListener("click", regenerateResources);
+  showAllCheckbox.addEventListener("change", () => {
+    showAll = showAllCheckbox.checked;
+    refreshResourcesEditor();
+  });
   byId("resourcesManually").addEventListener("click", enterResourcesManualAssign);
   byId("resourcesManuallyApply").addEventListener("click", applyResourcesManualAssign);
   byId("resourcesManuallyCancel").addEventListener("click", exitResourcesManualAssign);
@@ -53,7 +60,7 @@ function editResources() {
     const types = Resources.getTypes();
     const counts = {};
     for (const i of cells.i) {
-      const id = cells.resource[i];
+      const id = showAll ? cells.hiddenResource[i] : cells.resource[i];
       if (id) counts[id] = (counts[id] || 0) + 1;
     }
     let lines = types
