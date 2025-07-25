@@ -394,6 +394,15 @@ async function parseLoadedData(data, mapVersion) {
       pack.routes = data[37] ? JSON.parse(data[37]) : [];
       pack.zones = data[38] ? JSON.parse(data[38]) : [];
       pack.resources = data[39] ? JSON.parse(data[39]) : [];
+      pack.cells.resource = new Uint8Array(pack.cells.i.length);
+      pack.cells.hiddenResource = new Uint8Array(pack.cells.i.length);
+      pack.resources.forEach(r => {
+        const cellsArr = findAll(r.x, r.y, r.size);
+        cellsArr.forEach(c => {
+          pack.cells.hiddenResource[c] = r.type;
+          if (r.visible) pack.cells.resource[c] = r.type;
+        });
+      });
       pack.cells.biome = Uint8Array.from(data[16].split(","));
       pack.cells.burg = Uint16Array.from(data[17].split(","));
       pack.cells.conf = Uint8Array.from(data[18].split(","));

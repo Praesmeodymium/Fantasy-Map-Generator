@@ -654,6 +654,7 @@ async function generate(options) {
     Cultures.generate();
     Cultures.expand();
     BurgsAndStates.generate();
+    Resources.discoverAroundBurgs();
     Routes.generate();
     Religions.generate();
     BurgsAndStates.defineStateForms();

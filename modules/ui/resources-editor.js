@@ -6,10 +6,16 @@ function editResources() {
 
   const body = byId("resourcesBody");
   const filters = byId("resourcesFilters");
+  const showAllButton = byId("resourcesShowAll");
+  const displaySizeButton = byId("resourcesDisplaySize");
+  const useIconsButton = byId("resourcesUseIcons");
+  let showAll = false;
   refreshResourcesEditor();
-  byId("resourcesDisplaySize").checked = Resources.getDisplayMode();
-  byId("resourcesUseIcons").checked = Resources.getUseIcons();
+  drawResources(showAll);
+  if (Resources.getDisplayMode()) displaySizeButton.classList.add("pressed");
+  if (Resources.getUseIcons()) useIconsButton.classList.add("pressed");
   byId("resourcesFrequency").value = Resources.getFrequency();
+  if (showAll) showAllButton.classList.add("pressed");
 
   if (modules.editResources) return;
   modules.editResources = true;
@@ -26,6 +32,14 @@ function editResources() {
   byId("resourcesEditStyle").addEventListener("click", () => editStyle("resources"));
   byId("resourcesLegend").addEventListener("click", toggleLegend);
   byId("resourcesRegenerate").addEventListener("click", regenerateResources);
+  showAllButton.addEventListener("click", () => {
+    showAll = !showAll;
+    showAllButton.classList.toggle("pressed", showAll);
+    showAllButton.classList.toggle("icon-eye-off", !showAll);
+    showAllButton.classList.toggle("icon-eye", showAll);
+    refreshResourcesEditor();
+    drawResources(showAll);
+  });
   byId("resourcesManually").addEventListener("click", enterResourcesManualAssign);
   byId("resourcesManuallyApply").addEventListener("click", applyResourcesManualAssign);
   byId("resourcesManuallyCancel").addEventListener("click", exitResourcesManualAssign);
@@ -53,7 +67,7 @@ function editResources() {
     const types = Resources.getTypes();
     const counts = {};
     for (const i of cells.i) {
-      const id = cells.resource[i];
+      const id = showAll ? cells.hiddenResource[i] : cells.resource[i];
       if (id) counts[id] = (counts[id] || 0) + 1;
     }
     let lines = types
@@ -81,11 +95,12 @@ function editResources() {
              `<input class="resourceBase" type="number" step="0.001" value="0" style="width:4em"/>`+
              `<input class="resourceSize" type="number" step="1" min="1" value="1" style="width:4em"/>`+
              `<div class="resourceCells">0</div></div>`;
-    body.innerHTML = lines;
-    body.querySelector("div.states")?.classList.add("selected");
-    byId("resourcesFooterNumber").textContent = pack.resources.length;
-    updateFilters();
-  }
+  body.innerHTML = lines;
+  body.querySelector("div.states")?.classList.add("selected");
+  byId("resourcesFooterNumber").textContent = pack.resources.length;
+  updateFilters();
+  drawResources(showAll);
+}
 
   function updateFilters() {
     body.querySelectorAll("div.states.resources").forEach(line => {
@@ -112,7 +127,11 @@ function editResources() {
   }
 
   function regenerateResources() {
-    Resources.regenerate().then(refreshResourcesEditor);
+    Resources.regenerate().then(() => {
+      Resources.discoverAroundBurgs();
+      refreshResourcesEditor();
+      drawResources(showAll);
+    });
   }
 
   function enterResourcesManualAssign() {
@@ -170,7 +189,7 @@ function editResources() {
         pack.resources.push({i: id, type: typeId, x: rn(x,2), y: rn(y,2), cell: i, size, tons});
       }
     });
-    drawResources();
+    drawResources(showAll);
   }
 
   function applyResourcesManualAssign() {
@@ -200,7 +219,7 @@ function editResources() {
       const type = types.find(t => t.id === resource);
       if (type) type.color = newFill;
       Resources.updateTypes(types);
-      drawResources();
+      drawResources(showAll);
     };
     openPicker(currentFill, callback);
   }
@@ -211,7 +230,7 @@ function editResources() {
     const type = types.find(t => t.id === resource);
     if (type) type.name = el.value;
     Resources.updateTypes(types);
-    drawResources();
+    drawResources(showAll);
     updateFilters();
   }
 
@@ -249,7 +268,7 @@ function editResources() {
     const type = types.find(t => t.id === resource);
     if (type) type.icon = el.value;
     Resources.updateTypes(types);
-    drawResources();
+    drawResources(showAll);
     updateFilters();
   }
 
@@ -257,7 +276,7 @@ function editResources() {
     const resource = +el.parentNode.dataset.id;
     if (el.checked) Resources.showType(resource);
     else Resources.hideType(resource);
-    drawResources();
+    drawResources(showAll);
   }
 
   function removeCustomResource(el) {
@@ -265,18 +284,20 @@ function editResources() {
     const types = Resources.getTypes().filter(t => t.id !== resource);
     Resources.updateTypes(types);
     refreshResourcesEditor();
-    drawResources();
+    drawResources(showAll);
     updateFilters();
   }
 
   byId("resourcesAdd").addEventListener("click", addCustomResource);
-  byId("resourcesDisplaySize").addEventListener("change", () => {
-    Resources.setDisplayMode(byId("resourcesDisplaySize").checked);
-    drawResources();
+  displaySizeButton.addEventListener("click", () => {
+    const active = displaySizeButton.classList.toggle("pressed");
+    Resources.setDisplayMode(active);
+    drawResources(showAll);
   });
-  byId("resourcesUseIcons").addEventListener("change", () => {
-    Resources.setUseIcons(byId("resourcesUseIcons").checked);
-    drawResources();
+  useIconsButton.addEventListener("click", () => {
+    const active = useIconsButton.classList.toggle("pressed");
+    Resources.setUseIcons(active);
+    drawResources(showAll);
   });
   byId("resourcesFrequency").addEventListener("change", () => {
     const val = +byId("resourcesFrequency").value;

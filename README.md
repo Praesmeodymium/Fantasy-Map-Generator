@@ -28,32 +28,4 @@ _Inspiration:_
 
 - Scott Turner's [_Here Dragons Abound_](https://heredragonsabound.blogspot.com)
 
-## Development Setup
-
-This project uses a Node-based toolchain for linting, formatting, and testing.
-
-1. Install dependencies:
-   ```bash
-   npm install
-   ```
-2. Run ESLint:
-   ```bash
-   npm run lint
-   ```
-3. Format code with Prettier:
-   ```bash
-   npm run format
-   ```
-4. Execute tests:
-   ```bash
-   npm test
-   ```
-
-If commands fail due to missing packages such as `jest` or `eslint`, ensure that
-development dependencies are installed:
-```bash
-npm install
-```
-
-These commands require `npm` and the listed dev dependencies to be installed.
-
+***Praesmeodymium added a resources layer and hooked it into civilization generation with some advantages during the growth, not fully tested for balance, or a lot of other things. Resource editor shows undiscovered/unused resources as well as an editor for placing/removing and custom resources. not all rescource data is exposed in the editor yet. ***

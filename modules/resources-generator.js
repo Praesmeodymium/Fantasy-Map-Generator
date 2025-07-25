@@ -5,7 +5,8 @@ window.Resources = (function () {
   const STORAGE_KEY = "resourcesConfig";
   let displayBySize = false;
   let useIcons = true;
-  let frequency = 0.1; // overall spawn rate multiplier
+  // overall spawn rate multiplier, reduced to 50% of original
+  let frequency = 0.05;
   const hidden = new Set();
 
   // region size used to group deposits for size similarity
@@ -131,7 +132,8 @@ window.Resources = (function () {
     const {cells} = pack;
     const tectonicMap = computeTectonicZones();
     pack.resources = [];
-    cells.resource = new Uint8Array(cells.i.length);
+    cells.resource = new Uint8Array(cells.i.length); // visible resources
+    cells.hiddenResource = new Uint8Array(cells.i.length); // undiscovered resources
     const used = new Set();
     let id = 0;
     for (const i of cells.i) {
@@ -160,10 +162,10 @@ window.Resources = (function () {
       const affected = size > 1 ? findAll(x, y, size) : [i];
       affected.forEach(c => {
         if (cells.h[c] < 20 || used.has(c)) return;
-        cells.resource[c] = type.id;
+        cells.hiddenResource[c] = type.id;
         used.add(c);
       });
-      pack.resources.push({i: ++id, type: type.id, x: rn(x, 2), y: rn(y, 2), cell: i, size, tons});
+      pack.resources.push({i: ++id, type: type.id, x: rn(x, 2), y: rn(y, 2), cell: i, size, tons, visible: false});
     }
   }
   async function regenerate() {
@@ -189,6 +191,33 @@ window.Resources = (function () {
   const isTypeVisible = id => !hidden.has(+id);
   const getHidden = () => Array.from(hidden);
 
+  // reveal deposit and update visible cells
+  function discoverDeposit(deposit) {
+    if (deposit.visible) return;
+    const cells = findAll(deposit.x, deposit.y, deposit.size);
+    cells.forEach(c => {
+      if (pack.cells.hiddenResource[c] === deposit.type) {
+        pack.cells.resource[c] = deposit.type;
+      }
+    });
+    deposit.visible = true;
+  }
+
+  // discover resources around existing burgs
+  function discoverAroundBurgs(radius = 2) {
+    const {burgs} = pack;
+    if (!burgs) return;
+    pack.resources.forEach(r => {
+      if (r.visible) return;
+      const near = burgs.some(b => {
+        if (!b.i || b.removed) return false;
+        const dist2 = (b.x - r.x) ** 2 + (b.y - r.y) ** 2;
+        return dist2 <= (radius * grid.spacing) ** 2;
+      });
+      if (near) discoverDeposit(r);
+    });
+  }
+
   return {
     generate,
     regenerate,
@@ -206,6 +235,8 @@ window.Resources = (function () {
     toggleType,
     isTypeVisible,
     getHidden,
+    discoverAroundBurgs,
+    discoverDeposit,
     getRandomSize,
     getDepositTons,
     getResourceWeight
