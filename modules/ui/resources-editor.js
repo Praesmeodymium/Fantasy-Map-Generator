@@ -6,14 +6,16 @@ function editResources() {
 
   const body = byId("resourcesBody");
   const filters = byId("resourcesFilters");
-  const showAllCheckbox = byId("resourcesShowAll");
+  const showAllButton = byId("resourcesShowAll");
+  const displaySizeButton = byId("resourcesDisplaySize");
+  const useIconsButton = byId("resourcesUseIcons");
   let showAll = false;
   refreshResourcesEditor();
   drawResources(showAll);
-  byId("resourcesDisplaySize").checked = Resources.getDisplayMode();
-  byId("resourcesUseIcons").checked = Resources.getUseIcons();
+  if (Resources.getDisplayMode()) displaySizeButton.classList.add("pressed");
+  if (Resources.getUseIcons()) useIconsButton.classList.add("pressed");
   byId("resourcesFrequency").value = Resources.getFrequency();
-  showAllCheckbox.checked = showAll;
+  if (showAll) showAllButton.classList.add("pressed");
 
   if (modules.editResources) return;
   modules.editResources = true;
@@ -30,8 +32,11 @@ function editResources() {
   byId("resourcesEditStyle").addEventListener("click", () => editStyle("resources"));
   byId("resourcesLegend").addEventListener("click", toggleLegend);
   byId("resourcesRegenerate").addEventListener("click", regenerateResources);
-  showAllCheckbox.addEventListener("change", () => {
-    showAll = showAllCheckbox.checked;
+  showAllButton.addEventListener("click", () => {
+    showAll = !showAll;
+    showAllButton.classList.toggle("pressed", showAll);
+    showAllButton.classList.toggle("icon-eye-off", !showAll);
+    showAllButton.classList.toggle("icon-eye", showAll);
     refreshResourcesEditor();
     drawResources(showAll);
   });
@@ -284,12 +289,14 @@ function editResources() {
   }
 
   byId("resourcesAdd").addEventListener("click", addCustomResource);
-  byId("resourcesDisplaySize").addEventListener("change", () => {
-    Resources.setDisplayMode(byId("resourcesDisplaySize").checked);
+  displaySizeButton.addEventListener("click", () => {
+    const active = displaySizeButton.classList.toggle("pressed");
+    Resources.setDisplayMode(active);
     drawResources(showAll);
   });
-  byId("resourcesUseIcons").addEventListener("change", () => {
-    Resources.setUseIcons(byId("resourcesUseIcons").checked);
+  useIconsButton.addEventListener("click", () => {
+    const active = useIconsButton.classList.toggle("pressed");
+    Resources.setUseIcons(active);
     drawResources(showAll);
   });
   byId("resourcesFrequency").addEventListener("change", () => {
