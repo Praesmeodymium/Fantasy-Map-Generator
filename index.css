@@ -2021,6 +2021,19 @@ div.textual span,
   box-shadow: 2px 2px 5px -3px #3a2804;
 }
 
+#civPlayerControls {
+  display: none;
+  position: fixed;
+  width: 28vw;
+  left: 1vw;
+  bottom: 1vw;
+  font-size: 1.2em;
+  border: 1px solid #5e4fa2;
+  background: rgba(255, 250, 228, 0.7);
+  box-shadow: 2px 2px 5px -3px #3a2804;
+  z-index: 1000;
+}
+
 @media screen and (max-width: 600px) {
   #notes {
     width: 50vw;
