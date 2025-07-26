@@ -1716,6 +1716,15 @@
               </td>
             </tr>
 
+            <tr data-tip="Animate states growth on generation">
+              <td></td>
+              <td>Growth show</td>
+              <td colspan="2">
+                <input type="checkbox" id="showGrowth" />
+                <slider-input id="growthShowSpeed" min="0" max="100" value="100"></slider-input>
+              </td>
+            </tr>
+
             <tr data-tip="Define a number of towns to be placed (if enough suitable land exists)">
               <td>
                 <i data-locked="0" id="lock_manors" class="icon-lock-open"></i>
@@ -8214,10 +8223,20 @@
     <script defer src="modules/ui/battle-screen.js?v=1.108.5"></script>
     <script defer src="modules/ui/emblems-editor.js?v=1.99.00"></script>
     <script defer src="modules/ui/markers-editor.js?v=1.108.5"></script>
+    <div id="growthControls" class="dialog" style="display:none; position: absolute; left: 10px; bottom: 10px;">
+      <button id="growthPlayBtn">Play</button>
+      <button id="growthPauseBtn">Pause</button>
+      <button id="growthBackBtn">Step -</button>
+      <button id="growthForwardBtn">Step +</button>
+      <button id="growthRewindBtn">Rewind</button>
+      <button id="growthRefreshBtn">Refresh</button>
+      <button id="growthRegenerateBtn">Regenerate</button>
+    </div>
     <script defer src="modules/ui/3d.js?v=1.99.00"></script>
     <script defer src="modules/ui/submap-tool.js?v=1.106.2"></script>
     <script defer src="modules/ui/transform-tool.js?v=1.106.2"></script>
     <script defer src="modules/ui/hotkeys.js?v=1.104.0"></script>
+    <script defer src="modules/ui/growth-show.js"></script>
     <script defer src="modules/coa-renderer.js?v=1.99.00"></script>
     <script defer src="libs/rgbquant.min.js"></script>
     <script defer src="libs/jquery.ui.touch-punch.min.js"></script>

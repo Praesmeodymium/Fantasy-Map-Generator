@@ -653,7 +653,7 @@ async function generate(options) {
     rankCells();
     Cultures.generate();
     Cultures.expand();
-    BurgsAndStates.generate();
+    const {growthSteps} = BurgsAndStates.generate({showGrowth: byId("showGrowth")?.checked});
     Resources.discoverAroundBurgs();
     Routes.generate();
     Religions.generate();
@@ -674,6 +674,12 @@ async function generate(options) {
 
     WARN && console.warn(`TOTAL: ${rn((performance.now() - timeStart) / 1000, 2)}s`);
     showStatistics();
+    if (byId("showGrowth")?.checked) {
+      byId("growthControls").style.display = "block";
+      GrowthShowUI.start(growthSteps);
+    } else {
+      byId("growthControls").style.display = "none";
+    }
     INFO && console.groupEnd("Generated Map " + seed);
   } catch (error) {
     ERROR && console.error(error);

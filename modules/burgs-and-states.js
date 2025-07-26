@@ -1,7 +1,9 @@
 "use strict";
 
 window.BurgsAndStates = (() => {
-  const generate = () => {
+  const generate = options => {
+    options = options || {};
+    const showGrowth = options.showGrowth;
     const {cells, cultures} = pack;
     const n = cells.i.length;
 
@@ -11,7 +13,7 @@ window.BurgsAndStates = (() => {
     pack.states = createStates();
 
     placeTowns();
-    expandStates();
+    const steps = showGrowth ? expandStatesWithSteps() : (expandStates(), null);
     normalizeStates();
     getPoles();
 
@@ -22,6 +24,8 @@ window.BurgsAndStates = (() => {
 
     generateCampaigns();
     generateDiplomacy();
+
+    return {growthSteps: steps};
 
     function placeCapitals() {
       TIME && console.time("placeCapitals");
@@ -377,6 +381,75 @@ window.BurgsAndStates = (() => {
     }
 
     TIME && console.timeEnd("expandStates");
+  };
+
+  const expandStatesWithSteps = () => {
+    TIME && console.time("expandStatesWithSteps");
+    const {cells, states, cultures, burgs} = pack;
+
+    cells.state = cells.state || new Uint16Array(cells.i.length);
+
+    const queue = new FlatQueue();
+    const cost = [];
+    const steps = [];
+
+    const globalGrowthRate = byId("growthRate").valueAsNumber || 1;
+    const statesGrowthRate = byId("statesGrowthRate")?.valueAsNumber || 1;
+    const growthRate = (cells.i.length / 2) * globalGrowthRate * statesGrowthRate;
+
+    for (const cellId of cells.i) {
+      const state = states[cells.state[cellId]];
+      if (state.lock) continue;
+      cells.state[cellId] = 0;
+    }
+
+    for (const state of states) {
+      if (!state.i || state.removed) continue;
+      const capitalCell = burgs[state.capital].cell;
+      cells.state[capitalCell] = state.i;
+      const cultureCenter = cultures[state.culture].center;
+      const b = cells.biome[cultureCenter];
+      queue.push({e: state.center, p: 0, s: state.i, b}, 0);
+      cost[state.center] = 1;
+    }
+
+    while (queue.length) {
+      const next = queue.pop();
+      const {e, p, s, b} = next;
+      const {type, culture} = states[s];
+
+      cells.c[e].forEach(e => {
+        const state = states[cells.state[e]];
+        if (state.lock) return;
+        if (cells.state[e] && e === state.center) return;
+
+        const cultureCost = culture === cells.culture[e] ? -9 : 100;
+        const populationCost = cells.h[e] < 20 ? 0 : cells.s[e] ? Math.max(20 - cells.s[e], 0) : 5000;
+        const biomeCost = getBiomeCost(b, cells.biome[e], type);
+        const heightCost = getHeightCost(pack.features[cells.f[e]], cells.h[e], type);
+        const riverCost = getRiverCost(cells.r[e], e, type);
+        const typeCost = getTypeCost(cells.t[e], type);
+        const cellCost = Math.max(cultureCost + populationCost + biomeCost + heightCost + riverCost + typeCost, 0);
+        const totalCost = p + 10 + cellCost / states[s].expansionism;
+
+        if (totalCost > growthRate) return;
+
+        if (!cost[e] || totalCost < cost[e]) {
+          if (cells.h[e] >= 20) {
+            const prev = cells.state[e];
+            cells.state[e] = s;
+            if (prev !== s) steps.push({cell: e, from: prev, to: s});
+          }
+          cost[e] = totalCost;
+          queue.push({e, p: totalCost, s, b}, totalCost);
+        }
+      });
+    }
+
+    burgs.filter(b => b.i && !b.removed).forEach(b => (b.state = cells.state[b.cell]));
+
+    TIME && console.timeEnd("expandStatesWithSteps");
+    return steps;
   };
 
   const normalizeStates = () => {
@@ -868,6 +941,7 @@ window.BurgsAndStates = (() => {
   return {
     generate,
     expandStates,
+    expandStatesWithSteps,
     normalizeStates,
     getPoles,
     assignColors,
