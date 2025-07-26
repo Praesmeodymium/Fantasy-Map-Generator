@@ -6280,7 +6280,12 @@
     ></div>
 
     <div id="mapOverlay" style="display: none">Drop a map file to open</div>
-    <div id="civPlayerControls"></div>
+    <div id="civPlayerControls">
+      <button id="civPlayBtn">Play</button>
+      <button id="civPauseBtn">Pause</button>
+      <button id="civStepBackBtn">Step -</button>
+      <button id="civStepForwardBtn">Step +</button>
+    </div>
 
     <div id="fileInputs" style="display: none">
       <input type="file" accept=".map,.gz" id="mapToLoad" />
@@ -8238,6 +8243,7 @@
     <script defer src="modules/ui/transform-tool.js?v=1.106.2"></script>
     <script defer src="modules/ui/hotkeys.js?v=1.104.0"></script>
     <script defer src="modules/ui/growth-show.js"></script>
+    <script defer src="modules/ui/civ-player-controls.js"></script>
     <script defer src="modules/coa-renderer.js?v=1.99.00"></script>
     <script defer src="libs/rgbquant.min.js"></script>
     <script defer src="libs/jquery.ui.touch-punch.min.js"></script>

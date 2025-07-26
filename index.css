@@ -2022,7 +2022,7 @@ div.textual span,
 }
 
 #civPlayerControls {
-  display: none;
+  display: block;
   position: fixed;
   width: 28vw;
   left: 1vw;
