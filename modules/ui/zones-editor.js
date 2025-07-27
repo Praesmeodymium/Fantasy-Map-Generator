@@ -8,15 +8,15 @@ function editZones() {
   updateFilters();
   zonesEditorAddLines();
 
-  if (modules.editZones) return;
-  modules.editZones = true;
-
   $("#zonesEditor").dialog({
     title: "Zones Editor",
     resizable: false,
     close: () => exitZonesManualAssignment("close"),
     position: {my: "right top", at: "right-10 top+10", of: "svg", collision: "fit"}
   });
+
+  if (modules.editZones) return;
+  modules.editZones = true;
 
   // add listeners
   byId("zonesFilterType").on("click", updateFilters);

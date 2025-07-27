@@ -11,9 +11,6 @@ function editProvinces() {
   const body = byId("provincesBodySection");
   refreshProvincesEditor();
 
-  if (modules.editProvinces) return;
-  modules.editProvinces = true;
-
   $("#provincesEditor").dialog({
     title: "Provinces Editor",
     resizable: false,
@@ -21,6 +18,9 @@ function editProvinces() {
     close: closeProvincesEditor,
     position: {my: "right top", at: "right-10 top+10", of: "svg", collision: "fit"}
   });
+
+  if (modules.editProvinces) return;
+  modules.editProvinces = true;
 
   // add listeners
   byId("provincesEditorRefresh").on("click", refreshProvincesEditor);

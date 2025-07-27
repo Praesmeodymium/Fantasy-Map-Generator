@@ -17,9 +17,6 @@ function editResources() {
   byId("resourcesFrequency").value = Resources.getFrequency();
   if (showAll) showAllButton.classList.add("pressed");
 
-  if (modules.editResources) return;
-  modules.editResources = true;
-
   $("#resourcesEditor").dialog({
     title: "Resources Editor",
     resizable: false,
@@ -27,6 +24,9 @@ function editResources() {
     position: {my: "right top", at: "right-10 top+10", of: "svg", collision: "fit"},
     close: closeResourcesEditor
   });
+
+  if (modules.editResources) return;
+  modules.editResources = true;
 
   byId("resourcesEditorRefresh").addEventListener("click", refreshResourcesEditor);
   byId("resourcesEditStyle").addEventListener("click", () => editStyle("resources"));
