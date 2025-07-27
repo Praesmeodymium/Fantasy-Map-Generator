@@ -59,6 +59,8 @@ function editResources() {
     else if (cl.contains("resourceBase")) resourceChangeBase(el);
     else if (cl.contains("resourceSize")) resourceChangeSize(el);
     else if (cl.contains("resourceIcon")) resourceChangeIcon(el);
+    else if (cl.contains("resourceType")) resourceChangeType(el);
+    else if (cl.contains("resourceCivImpact")) resourceChangeCivImpact(el);
     else if (cl.contains("resourceVisible")) resourceToggleVisibility(el);
   });
 
@@ -73,27 +75,31 @@ function editResources() {
     let lines = types
       .map(t => {
         const count = counts[t.id] || 0;
-        return `<div class="states resources" data-id="${t.id}" data-name="${t.name}" data-color="${t.color}" data-base="${t.base}" data-size="${t.size}" data-icon="${t.icon || ''}" data-cells="${count}">`+
+        return `<div class="states resources" data-id="${t.id}" data-name="${t.name}" data-color="${t.color}" data-base="${t.base}" data-size="${t.size}" data-icon="${t.icon || ''}" data-type="${t.type}" data-civimpact="${t.civImpact ?? 0}" data-cells="${count}">`+
           `<fill-box fill="${t.color}" class="resourceColor"></fill-box>`+
           `<input id="resourceVisible${t.id}" class="checkbox resourceVisible" type="checkbox" ${Resources.isTypeVisible(t.id) ? "checked" : ""}/>`+
           `<label for="resourceVisible${t.id}" class="checkbox-label"></label>`+
           `<input class="resourceIcon" value="${t.icon || ''}" style="width:2em"/>`+
           `<input class="resourceName" value="${t.name}" style="width:8em"/>`+
+          `<input class="resourceType" value="${t.type}" style="width:6em"/>`+
           `<input class="resourceBase" type="number" step="0.001" value="${t.base}" style="width:4em"/>`+
           `<input class="resourceSize" type="number" step="1" min="1" value="${t.size}" style="width:4em"/>`+
+          `<input class="resourceCivImpact" type="number" step="0.1" value="${t.civImpact ?? 0}" style="width:5em"/>`+
           `<div data-tip="Cells count" class="resourceCells">${count}</div>`+
           `${t.custom ? '<span data-tip="Remove the custom resource" class="icon-trash-empty"></span>' : ''}`+
           `</div>`;
       })
       .join("");
-    lines += `<div class="states resources" data-id="0" data-name="None" data-color="#eee" data-base="0" data-size="1" data-icon="" data-cells="0">`+
+    lines += `<div class="states resources" data-id="0" data-name="None" data-color="#eee" data-base="0" data-size="1" data-icon="" data-type="" data-civimpact="0" data-cells="0">`+
              `<fill-box fill="#eee" class="resourceColor"></fill-box>`+
              `<input id="resourceVisible0" class="checkbox resourceVisible" type="checkbox" checked disabled/>`+
              `<label for="resourceVisible0" class="checkbox-label"></label>`+
              `<input class="resourceIcon" value="" style="width:2em"/>`+
              `<div class="resourceName" style="width:8em">None</div>`+
+             `<input class="resourceType" value="" style="width:6em"/>`+
              `<input class="resourceBase" type="number" step="0.001" value="0" style="width:4em"/>`+
              `<input class="resourceSize" type="number" step="1" min="1" value="1" style="width:4em"/>`+
+             `<input class="resourceCivImpact" type="number" step="0.1" value="0" style="width:5em"/>`+
              `<div class="resourceCells">0</div></div>`;
   body.innerHTML = lines;
   body.querySelector("div.states")?.classList.add("selected");
@@ -270,6 +276,28 @@ function editResources() {
     Resources.updateTypes(types);
     drawResources(showAll);
     updateFilters();
+  }
+
+  function resourceChangeType(el) {
+    const resource = +el.parentNode.dataset.id;
+    const types = Resources.getTypes();
+    const type = types.find(t => t.id === resource);
+    if (type) type.type = el.value;
+    Resources.updateTypes(types);
+    updateFilters();
+  }
+
+  function resourceChangeCivImpact(el) {
+    const resource = +el.parentNode.dataset.id;
+    const val = +el.value;
+    if (isNaN(val)) {
+      el.value = Resources.getType(resource).civImpact ?? 0;
+      return tip("Please provide a valid impact", false, "error");
+    }
+    const types = Resources.getTypes();
+    const type = types.find(t => t.id === resource);
+    if (type) type.civImpact = val;
+    Resources.updateTypes(types);
   }
 
   function resourceToggleVisibility(el) {
