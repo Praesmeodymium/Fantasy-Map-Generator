@@ -31,7 +31,7 @@ window.Resources = (function () {
     return getDepositSize(type.name, r);
   }
 
-  function addDeposit(typeId, cell) {
+  function addDeposit(typeId, cell, visible = false) {
     const type = getType(typeId);
     if (!type) return;
     const [x, y] = pack.cells.p[cell];
@@ -40,10 +40,27 @@ window.Resources = (function () {
     const affected = size > 1 ? findAll(x, y, size) : [cell];
     affected.forEach(c => {
       if (pack.cells.h[c] < 20) return;
-      pack.cells.hiddenResource[c] = typeId;
+      if (visible) pack.cells.resource[c] = typeId;
+      else pack.cells.hiddenResource[c] = typeId;
     });
     const id = (last(pack.resources)?.i || 0) + 1;
-    pack.resources.push({i: id, type: typeId, x: rn(x,2), y: rn(y,2), cell, size, tons, visible: false});
+    const deposit = {i: id, type: typeId, x: rn(x,2), y: rn(y,2), cell, size, tons, visible};
+    pack.resources.push(deposit);
+    return deposit;
+  }
+
+  function removeHiddenDeposit(typeId) {
+    const hiddenDeposits = pack.resources.filter(r => r.type === typeId && !r.visible);
+    if (!hiddenDeposits.length) return;
+    const deposit = ra(hiddenDeposits);
+    const index = pack.resources.indexOf(deposit);
+    pack.resources.splice(index, 1);
+    const cells = findAll(deposit.x, deposit.y, deposit.size);
+    cells.forEach(c => {
+      if (pack.cells.hiddenResource[c] === deposit.type) {
+        pack.cells.hiddenResource[c] = 0;
+      }
+    });
   }
 
   async function loadConfig() {
@@ -252,6 +269,7 @@ window.Resources = (function () {
     getHidden,
     discoverAroundBurgs,
     addDeposit,
+    removeHiddenDeposit,
     discoverDeposit,
     getRandomSize,
     getDepositTons,
