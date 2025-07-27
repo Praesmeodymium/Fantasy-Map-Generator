@@ -31,6 +31,21 @@ window.Resources = (function () {
     return getDepositSize(type.name, r);
   }
 
+  function addDeposit(typeId, cell) {
+    const type = getType(typeId);
+    if (!type) return;
+    const [x, y] = pack.cells.p[cell];
+    const size = getRandomSize(type, x, y);
+    const tons = getDepositTons(type, x, y);
+    const affected = size > 1 ? findAll(x, y, size) : [cell];
+    affected.forEach(c => {
+      if (pack.cells.h[c] < 20) return;
+      pack.cells.hiddenResource[c] = typeId;
+    });
+    const id = (last(pack.resources)?.i || 0) + 1;
+    pack.resources.push({i: id, type: typeId, x: rn(x,2), y: rn(y,2), cell, size, tons, visible: false});
+  }
+
   async function loadConfig() {
     if (types.length) return types;
     const stored = JSON.safeParse(localStorage.getItem(STORAGE_KEY));
@@ -236,6 +251,7 @@ window.Resources = (function () {
     isTypeVisible,
     getHidden,
     discoverAroundBurgs,
+    addDeposit,
     discoverDeposit,
     getRandomSize,
     getDepositTons,
