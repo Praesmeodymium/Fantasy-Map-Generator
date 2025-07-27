@@ -207,6 +207,10 @@ window.Resources = (function () {
 
   const getType = id => types.find(t => t.id === id);
   const getTypes = () => types.slice();
+  const getCivImpact = id => {
+    const t = getType(id);
+    return t?.civImpact || 0;
+  };
   const updateTypes = t => {
     types = t.slice();
     localStorage.setItem(STORAGE_KEY, JSON.stringify(types));
@@ -273,7 +277,8 @@ window.Resources = (function () {
     discoverDeposit,
     getRandomSize,
     getDepositTons,
-    getResourceWeight
+    getResourceWeight,
+    getCivImpact
   };
 
 })();

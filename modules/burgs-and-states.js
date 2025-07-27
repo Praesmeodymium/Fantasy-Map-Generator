@@ -7,6 +7,17 @@ window.BurgsAndStates = (() => {
     const {cells, cultures} = pack;
     const n = cells.i.length;
 
+    function getResourcesAround(cellId, radius = 20 * grid.spacing) {
+      const [x, y] = cells.p[cellId];
+      const nearby = findAll(x, y, radius);
+      const resSet = new Set();
+      nearby.forEach(c => {
+        const r = cells.resource[c] || cells.hiddenResource[c];
+        if (r) resSet.add(r);
+      });
+      return Array.from(resSet);
+    }
+
     cells.burg = new Uint16Array(n); // cell burg
 
     const burgs = (pack.burgs = placeCapitals());
@@ -33,7 +44,21 @@ window.BurgsAndStates = (() => {
       let burgs = [0];
 
       const rand = () => 0.5 + Math.random() * 0.5;
-      const score = new Int16Array(cells.s.map(s => s * rand())); // cell score for capitals placement
+
+      const resourceRadius = 20 * grid.spacing;
+      const resourceScores = new Float32Array(cells.i.length);
+      for (const i of cells.i) {
+        const [x, y] = cells.p[i];
+        const nearby = findAll(x, y, resourceRadius);
+        let resScore = 0;
+        nearby.forEach(c => {
+          const res = cells.resource[c] || cells.hiddenResource[c];
+          if (res) resScore += Resources.getCivImpact(res);
+        });
+        resourceScores[i] = resScore;
+      }
+
+      const score = new Int16Array(cells.s.map((s, i) => Math.round(s * rand() + resourceScores[i]))); // cell score for capitals placement
       const sorted = cells.i.filter(i => score[i] > 0 && cells.culture[i]).sort((a, b) => score[b] - score[a]); // filtered and sorted array of indexes
 
       if (sorted.length < count * 10) {
@@ -97,6 +122,9 @@ window.BurgsAndStates = (() => {
 
         const coa = COA.generate(null, null, null, type);
         coa.shield = COA.getShield(b.culture, null);
+        const nearResources = getResourcesAround(b.cell);
+        const tech = rn(1 + nearResources.reduce((sum, r) => sum + Resources.getCivImpact(r), 0) / 20, 2);
+        const resourceNames = nearResources.map(r => Resources.getType(r)?.name).filter(Boolean);
         states.push({
           i,
           color: colors[i - 1],
@@ -106,7 +134,9 @@ window.BurgsAndStates = (() => {
           type,
           center: b.cell,
           culture: b.culture,
-          coa
+          coa,
+          resources: resourceNames,
+          tech
         });
         cells.burg[b.cell] = i;
       });
