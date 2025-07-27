@@ -164,7 +164,10 @@ window.Markers = (function () {
     occupied[marker.cell] = true;
     const resId = resourceByMarker[marker.type];
     if (resId && window.Resources?.addDeposit) {
-      Resources.addDeposit(resId, marker.cell);
+      const deposit = Resources.addDeposit(resId, marker.cell, true);
+      if (deposit && Resources.removeHiddenDeposit) {
+        Resources.removeHiddenDeposit(resId);
+      }
     }
     return marker;
   }
