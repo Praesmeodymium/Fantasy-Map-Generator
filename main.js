@@ -680,6 +680,7 @@ async function generate(options) {
     } else {
       byId("growthControls").style.display = "none";
     }
+    CivPlayerControls.start(growthSteps);
     INFO && console.groupEnd("Generated Map " + seed);
   } catch (error) {
     ERROR && console.error(error);
