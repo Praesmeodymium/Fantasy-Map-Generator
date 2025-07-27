@@ -3,13 +3,13 @@ function editUnits() {
   closeDialogs("#unitsEditor, .stable");
   $("#unitsEditor").dialog();
 
-  if (modules.editUnits) return;
-  modules.editUnits = true;
-
   $("#unitsEditor").dialog({
     title: "Units Editor",
     position: {my: "right top", at: "right-10 top+10", of: "svg", collision: "fit"}
   });
+
+  if (modules.editUnits) return;
+  modules.editUnits = true;
 
   const renderScaleBar = () => {
     drawScaleBar(scaleBar, scale);

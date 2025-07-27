@@ -57,9 +57,6 @@ function editDiplomacy() {
   refreshDiplomacyEditor();
   viewbox.style("cursor", "crosshair").on("click", selectStateOnMapClick);
 
-  if (modules.editDiplomacy) return;
-  modules.editDiplomacy = true;
-
   $("#diplomacyEditor").dialog({
     title: "Diplomacy Editor",
     resizable: false,
@@ -67,6 +64,9 @@ function editDiplomacy() {
     close: closeDiplomacyEditor,
     position: {my: "right top", at: "right-10 top+10", of: "svg", collision: "fit"}
   });
+
+  if (modules.editDiplomacy) return;
+  modules.editDiplomacy = true;
 
   // add listeners
   document.getElementById("diplomacyEditorRefresh").addEventListener("click", refreshDiplomacyEditor);

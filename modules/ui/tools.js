@@ -1,11 +1,49 @@
 "use strict";
 
+// mapping of buttons to dialogs for toggle behavior
+const buttonDialogMap = {
+  editBiomesButton: "#biomesEditor",
+  overviewBurgsButton: "#burgsOverview",
+  editCulturesButton: "#culturesEditor",
+  editDiplomacyButton: "#diplomacyEditor",
+  editEmblemButton: "#emblemEditor",
+  overviewMarkersButton: "#markersOverview",
+  editResourcesButton: "#resourcesEditor",
+  overviewMilitaryButton: "#militaryOverview",
+  editNamesBaseButton: "#namesbaseEditor",
+  editNotesButton: "#notesEditor",
+  editProvincesButton: "#provincesEditor",
+  editReligions: "#religionsEditor",
+  overviewRiversButton: "#riversOverview",
+  overviewRoutesButton: "#routesOverview",
+  editStatesButton: "#statesEditor",
+  editUnitsButton: "#unitsEditor",
+  editZonesButton: "#zonesEditor",
+  overviewCellsButton: "#cellInfo",
+  overviewChartsButton: "#chartsOverview",
+  addRoute: "#routeCreator",
+  openSubmapTool: "#submapTool",
+  openTransformTool: "#transformTool"
+};
+
 // module to control the Tools options (click to edit, to re-geenerate, tp add)
 
 toolsContent.addEventListener("click", function (event) {
   if (customization) return tip("Please exit the customization mode first", false, "error");
   if (!["BUTTON", "I"].includes(event.target.tagName)) return;
   const button = event.target.id;
+
+  // close dialog if it's already open
+  const selector = buttonDialogMap[button];
+  if (selector && $(selector).is(":visible")) {
+    $(selector).dialog("close");
+    return;
+  }
+
+  if (button === "editHeightmapButton" && customization === 1) {
+    document.getElementById("finalizeHeightmap").click();
+    return;
+  }
 
   // click on open Editor buttons
   if (button === "editHeightmapButton") editHeightmap();
@@ -641,7 +679,9 @@ function addLabelOnClick() {
 }
 
 function toggleAddBurg() {
+  const pressed = byId("addBurgTool").classList.contains("pressed");
   unpressClickToAddButton();
+  if (pressed) return;
   byId("addBurgTool").classList.add("pressed");
   overviewBurgs();
   byId("addNewBurg").click();
