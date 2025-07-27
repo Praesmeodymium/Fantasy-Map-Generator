@@ -29,3 +29,4 @@ _Inspiration:_
 - Scott Turner's [_Here Dragons Abound_](https://heredragonsabound.blogspot.com)
 
 ***Praesmeodymium added a resources layer and hooked it into civilization generation with some advantages during the growth, not fully tested for balance, or a lot of other things. Resource editor shows undiscovered/unused resources as well as an editor for placing/removing and custom resources. not all rescource data is exposed in the editor yet. ***
+- Certain markers like sacred forests now automatically spawn hidden resource deposits.

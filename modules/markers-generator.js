@@ -3,6 +3,11 @@
 window.Markers = (function () {
   let config = getDefaultConfig();
   let occupied = [];
+  const resourceByMarker = {
+    "sacred-forests": 13,
+    "sacred-pineries": 13,
+    "sacred-palm-groves": 13
+  };
 
   function getDefaultConfig() {
     const culturesSet = document.getElementById("culturesSet").value;
@@ -157,6 +162,10 @@ window.Markers = (function () {
     marker = {...base, x, y, ...marker, i};
     pack.markers.push(marker);
     occupied[marker.cell] = true;
+    const resId = resourceByMarker[marker.type];
+    if (resId && window.Resources?.addDeposit) {
+      Resources.addDeposit(resId, marker.cell);
+    }
     return marker;
   }
 
