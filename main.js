@@ -675,10 +675,10 @@ async function generate(options) {
     WARN && console.warn(`TOTAL: ${rn((performance.now() - timeStart) / 1000, 2)}s`);
     showStatistics();
     if (byId("showGrowth")?.checked) {
-      byId("growthControls").style.display = "block";
-      GrowthShowUI.start(growthSteps);
+      byId("civPlayerControls").style.display = "block";
+      CivPlayerControls.start(growthSteps);
     } else {
-      byId("growthControls").style.display = "none";
+      byId("civPlayerControls").style.display = "none";
     }
     INFO && console.groupEnd("Generated Map " + seed);
   } catch (error) {
