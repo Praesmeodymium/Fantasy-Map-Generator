@@ -1,14 +1,15 @@
 "use strict";
 
 window.BurgsAndStates = (() => {
+  // tech_scaling defines how much a state's tech score affects its ability to expand
+  const tech_scaling = 0.025;
+
   const generate = options => {
     options = options || {};
     const showGrowth = options.showGrowth;
     const {cells, cultures} = pack;
     const n = cells.i.length;
 
-    // tech_scaling defines how much a state's tech score affects its ability to expand
-    const tech_scaling = 0.025;
 
     function getResourcesAround(cellId, radius = 20 * grid.spacing) {
       const [x, y] = cells.p[cellId];
