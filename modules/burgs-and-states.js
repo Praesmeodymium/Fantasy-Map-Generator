@@ -7,6 +7,9 @@ window.BurgsAndStates = (() => {
     const {cells, cultures} = pack;
     const n = cells.i.length;
 
+    // tech_scaling defines how much a state's tech score affects its ability to expand
+    const tech_scaling = 0.025;
+
     function getResourcesAround(cellId, radius = 20 * grid.spacing) {
       const [x, y] = cells.p[cellId];
       const nearby = findAll(x, y, radius);
@@ -364,7 +367,8 @@ window.BurgsAndStates = (() => {
         const riverCost = getRiverCost(cells.r[e], e, type);
         const typeCost = getTypeCost(cells.t[e], type);
         const cellCost = Math.max(cultureCost + populationCost + biomeCost + heightCost + riverCost + typeCost, 0);
-        const totalCost = p + 10 + cellCost / states[s].expansionism;
+        const techMultiplier = 1 + states[s].tech * tech_scaling;
+        const totalCost = p + 10 + cellCost / (states[s].expansionism * techMultiplier);
 
         if (totalCost > growthRate) return;
 
@@ -460,7 +464,8 @@ window.BurgsAndStates = (() => {
         const riverCost = getRiverCost(cells.r[e], e, type);
         const typeCost = getTypeCost(cells.t[e], type);
         const cellCost = Math.max(cultureCost + populationCost + biomeCost + heightCost + riverCost + typeCost, 0);
-        const totalCost = p + 10 + cellCost / states[s].expansionism;
+        const techMultiplier = 1 + states[s].tech * tech_scaling;
+        const totalCost = p + 10 + cellCost / (states[s].expansionism * techMultiplier);
 
         if (totalCost > growthRate) return;
 
