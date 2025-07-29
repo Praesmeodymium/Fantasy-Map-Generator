@@ -318,6 +318,39 @@ window.BurgsAndStates = (() => {
       });
   };
 
+  // Helper functions to calculate state expansion costs
+  function getBiomeCost(b, biome, type) {
+    if (b === biome) return 10; // tiny penalty for native biome
+    if (type === "Hunting") return biomesData.cost[biome] * 2; // non-native biome penalty for hunters
+    if (type === "Nomadic" && biome > 4 && biome < 10) return biomesData.cost[biome] * 3; // forest biome penalty for nomads
+    return biomesData.cost[biome]; // general non-native biome penalty
+  }
+
+  function getHeightCost(f, h, type) {
+    if (type === "Lake" && f.type === "lake") return 10; // low lake crossing penalty for Lake cultures
+    if (type === "Naval" && h < 20) return 300; // low sea crossing penalty for Navals
+    if (type === "Nomadic" && h < 20) return 10000; // giant sea crossing penalty for Nomads
+    if (h < 20) return 1000; // general sea crossing penalty
+    if (type === "Highland" && h < 62) return 1100; // penalty for highlanders on lowlands
+    if (type === "Highland") return 0; // no penalty for highlanders on highlands
+    if (h >= 67) return 2200; // general mountains crossing penalty
+    if (h >= 44) return 300; // general hills crossing penalty
+    return 0;
+  }
+
+  function getRiverCost(r, i, type) {
+    if (type === "River") return r ? 0 : 100; // penalty for river cultures
+    if (!r) return 0; // no penalty for others if there is no river
+    return minmax(cells.fl[i] / 10, 20, 100); // river penalty from 20 to 100 based on flux
+  }
+
+  function getTypeCost(t, type) {
+    if (t === 1) return type === "Naval" || type === "Lake" ? 0 : type === "Nomadic" ? 60 : 20; // penalty for coastline
+    if (t === 2) return type === "Naval" || type === "Nomadic" ? 30 : 0; // low penalty for land level 2 for Navals and nomads
+    if (t !== -1) return type === "Naval" || type === "Lake" ? 100 : 0; // penalty for mainland for navals
+    return 0;
+  }
+
   // expand cultures across the map (Dijkstra-like algorithm)
   const expandStates = () => {
     TIME && console.time("expandStates");
@@ -382,38 +415,6 @@ window.BurgsAndStates = (() => {
     }
 
     burgs.filter(b => b.i && !b.removed).forEach(b => (b.state = cells.state[b.cell])); // assign state to burgs
-
-    function getBiomeCost(b, biome, type) {
-      if (b === biome) return 10; // tiny penalty for native biome
-      if (type === "Hunting") return biomesData.cost[biome] * 2; // non-native biome penalty for hunters
-      if (type === "Nomadic" && biome > 4 && biome < 10) return biomesData.cost[biome] * 3; // forest biome penalty for nomads
-      return biomesData.cost[biome]; // general non-native biome penalty
-    }
-
-    function getHeightCost(f, h, type) {
-      if (type === "Lake" && f.type === "lake") return 10; // low lake crossing penalty for Lake cultures
-      if (type === "Naval" && h < 20) return 300; // low sea crossing penalty for Navals
-      if (type === "Nomadic" && h < 20) return 10000; // giant sea crossing penalty for Nomads
-      if (h < 20) return 1000; // general sea crossing penalty
-      if (type === "Highland" && h < 62) return 1100; // penalty for highlanders on lowlands
-      if (type === "Highland") return 0; // no penalty for highlanders on highlands
-      if (h >= 67) return 2200; // general mountains crossing penalty
-      if (h >= 44) return 300; // general hills crossing penalty
-      return 0;
-    }
-
-    function getRiverCost(r, i, type) {
-      if (type === "River") return r ? 0 : 100; // penalty for river cultures
-      if (!r) return 0; // no penalty for others if there is no river
-      return minmax(cells.fl[i] / 10, 20, 100); // river penalty from 20 to 100 based on flux
-    }
-
-    function getTypeCost(t, type) {
-      if (t === 1) return type === "Naval" || type === "Lake" ? 0 : type === "Nomadic" ? 60 : 20; // penalty for coastline
-      if (t === 2) return type === "Naval" || type === "Nomadic" ? 30 : 0; // low penalty for land level 2 for Navals and nomads
-      if (t !== -1) return type === "Naval" || type === "Lake" ? 100 : 0; // penalty for mainland for navals
-      return 0;
-    }
 
     TIME && console.timeEnd("expandStates");
   };
