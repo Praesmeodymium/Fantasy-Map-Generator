@@ -22,7 +22,10 @@ if (parseMapVersion(VERSION) !== VERSION) alert("versioning.js: Invalid format o
   if (loadingScreenVersion) loadingScreenVersion.innerText = `v${VERSION}`;
 
   const storedVersion = localStorage.getItem("version");
-  if (compareVersions(storedVersion, VERSION, {major: true, minor: true, patch: false}).isOlder) {
+  // Clear outdated cached scripts on patch update
+  if (compareVersions(storedVersion, VERSION, {major: true, minor: true, patch: true}).isOlder && storedVersion) {
+    cleanupData();
+  } else if (compareVersions(storedVersion, VERSION, {major: true, minor: true, patch: false}).isOlder) {
     setTimeout(showUpdateWindow, 6000);
   }
 
