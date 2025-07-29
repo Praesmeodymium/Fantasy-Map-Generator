@@ -675,10 +675,7 @@ async function generate(options) {
     WARN && console.warn(`TOTAL: ${rn((performance.now() - timeStart) / 1000, 2)}s`);
     showStatistics();
     if (byId("showGrowth")?.checked) {
-      byId("growthControls").style.display = "block";
-      GrowthShowUI.start(growthSteps);
-    } else {
-      byId("growthControls").style.display = "none";
+      // Growth steps computed above will be passed to CivPlayerControls
     }
     CivPlayerControls.start(growthSteps);
     INFO && console.groupEnd("Generated Map " + seed);
