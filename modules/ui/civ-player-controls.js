@@ -6,6 +6,7 @@ window.CivPlayerControls = (() => {
   let timer = null;
   let playing = false;
   let counterEl = null;
+  let initialStates = null;
 
   function showLayer() {
     if (!layerIsOn('toggleStates')) toggleStates();
@@ -51,6 +52,11 @@ window.CivPlayerControls = (() => {
     pack.cells.state[step.cell] = forward ? step.to : step.from;
   }
 
+  function resetToInitial() {
+    if (initialStates) pack.cells.state.set(initialStates);
+    index = 0;
+  }
+
   function draw() {
     if (layerIsOn('toggleStates')) drawStates();
     updateCounter();
@@ -67,17 +73,20 @@ window.CivPlayerControls = (() => {
   }
 
   function start(growthSteps) {
-    steps = growthSteps || [];
-    index = 0;
+    if (growthSteps && growthSteps.steps) {
+      steps = growthSteps.steps;
+      initialStates = growthSteps.initialStates || null;
+    } else {
+      steps = growthSteps || [];
+      initialStates = null;
+    }
+    resetToInitial();
     draw();
   }
 
   function rewind() {
     pause();
-    while (index > 0) {
-      index--;
-      applyStep(index, false);
-    }
+    resetToInitial();
     draw();
   }
 
@@ -106,8 +115,10 @@ window.CivPlayerControls = (() => {
 
   function regenerate() {
     pause();
-    steps = BurgsAndStates.expandStatesWithSteps();
-    index = 0;
+    const data = BurgsAndStates.expandStatesWithSteps();
+    steps = data.steps;
+    initialStates = data.initialStates;
+    resetToInitial();
     draw();
     play();
   }

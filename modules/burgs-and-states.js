@@ -28,7 +28,7 @@ window.BurgsAndStates = (() => {
     pack.states = createStates();
 
     placeTowns();
-    const steps = showGrowth ? expandStatesWithSteps() : (expandStates(), null);
+    const growthData = showGrowth ? expandStatesWithSteps() : (expandStates(), null);
     normalizeStates();
     getPoles();
 
@@ -40,7 +40,7 @@ window.BurgsAndStates = (() => {
     generateCampaigns();
     generateDiplomacy();
 
-    return {growthSteps: steps};
+    return {growthSteps: growthData};
 
     function placeCapitals() {
       TIME && console.time("placeCapitals");
@@ -430,6 +430,7 @@ window.BurgsAndStates = (() => {
     const queue = new FlatQueue();
     const cost = [];
     const steps = [];
+    let initialStates;
 
     const globalGrowthRate = byId("growthRate").valueAsNumber || 1;
     const statesGrowthRate = byId("statesGrowthRate")?.valueAsNumber || 1;
@@ -450,6 +451,8 @@ window.BurgsAndStates = (() => {
       queue.push({e: state.center, p: 0, s: state.i, b}, 0);
       cost[state.center] = 1;
     }
+
+    initialStates = new Uint16Array(cells.state);
 
     while (queue.length) {
       const next = queue.pop();
@@ -488,7 +491,7 @@ window.BurgsAndStates = (() => {
     burgs.filter(b => b.i && !b.removed).forEach(b => (b.state = cells.state[b.cell]));
 
     TIME && console.timeEnd("expandStatesWithSteps");
-    return steps;
+    return {steps, initialStates};
   };
 
   const normalizeStates = () => {
