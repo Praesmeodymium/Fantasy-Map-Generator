@@ -4,6 +4,7 @@ window.GrowthShowUI = (() => {
   let steps = [];
   let index = 0;
   let timer = null;
+  let initialStates = null;
 
   const playBtn = byId("growthPlayBtn");
   const pauseBtn = byId("growthPauseBtn");
@@ -24,6 +25,11 @@ window.GrowthShowUI = (() => {
     const step = steps[i];
     if (!step) return;
     pack.cells.state[step.cell] = forward ? step.to : step.from;
+  }
+
+  function resetToInitial() {
+    if (initialStates) pack.cells.state.set(initialStates);
+    index = 0;
   }
 
   function draw() {
@@ -52,10 +58,7 @@ window.GrowthShowUI = (() => {
 
   function rewind() {
     pause();
-    while (index > 0) {
-      index--;
-      applyStep(index, false);
-    }
+    resetToInitial();
     draw();
   }
 
@@ -84,8 +87,10 @@ window.GrowthShowUI = (() => {
 
   function regenerate() {
     pause();
-    steps = BurgsAndStates.expandStatesWithSteps();
-    index = 0;
+    const data = BurgsAndStates.expandStatesWithSteps();
+    steps = data.steps;
+    initialStates = data.initialStates;
+    resetToInitial();
     draw();
     play();
   }
@@ -104,8 +109,14 @@ window.GrowthShowUI = (() => {
   }
 
   function start(growthSteps) {
-    steps = growthSteps || [];
-    index = 0;
+    if (growthSteps && growthSteps.steps) {
+      steps = growthSteps.steps;
+      initialStates = growthSteps.initialStates || null;
+    } else {
+      steps = growthSteps || [];
+      initialStates = null;
+    }
+    resetToInitial();
     draw();
     if (steps.length) play();
   }
