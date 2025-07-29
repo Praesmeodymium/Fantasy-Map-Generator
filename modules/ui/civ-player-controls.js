@@ -5,6 +5,7 @@ window.CivPlayerControls = (() => {
   let index = 0;
   let timer = null;
   let playing = false;
+  let counterEl = null;
 
   function showLayer() {
     if (!layerIsOn('toggleStates')) toggleStates();
@@ -40,6 +41,10 @@ window.CivPlayerControls = (() => {
     return steps.length ? (total * 1000) / steps.length : 0;
   }
 
+  function updateCounter() {
+    if (counterEl) counterEl.textContent = `${index} / ${steps.length}`;
+  }
+
   function applyStep(i, forward = true) {
     const step = steps[i];
     if (!step) return;
@@ -48,6 +53,7 @@ window.CivPlayerControls = (() => {
 
   function draw() {
     if (layerIsOn('toggleStates')) drawStates();
+    updateCounter();
   }
 
   function frame() {
@@ -114,11 +120,13 @@ window.CivPlayerControls = (() => {
       <button id="civStepBackBtn" data-tip="Step back">-1</button>
       <button id="civStepForwardBtn" data-tip="Step forward">+1</button>
       <span id="civSpeedLabel">Speed:<slider-input id="civSpeed" min="1" max="100" value="50"></slider-input></span>
+      <span id="civStepCounter"></span>
       <button id="civReplayBtn" class="icon-cw" data-tip="Replay"></button>
       <button id="civRegenerateBtn" class="icon-arrows-cw" data-tip="Regenerate"></button>
     `;
     container.style.display = 'block';
     byId('civPlayPauseBtn').on('click', togglePlay);
+    counterEl = byId('civStepCounter');
     byId('civStepBackBtn').on('click', stepBackward);
     byId('civStepForwardBtn').on('click', stepForward);
     byId('civReplayBtn').on('click', refresh);
@@ -126,6 +134,7 @@ window.CivPlayerControls = (() => {
     byId('civSpeed')?.addEventListener('input', () => {
       if (timer) play();
     });
+    updateCounter();
   }
 
   return { init, play, pause, togglePlay, start };
