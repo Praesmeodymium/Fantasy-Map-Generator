@@ -32,4 +32,5 @@ test('adding marker with resource adds deposit', () => {
 
   expect(pack.resources.length).toBe(1);
   expect(pack.cells.hiddenResource[0]).toBe(13);
+  expect(pack.resources[0].discoveredStep).toBe(0);
 });

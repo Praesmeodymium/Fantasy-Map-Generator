@@ -2,6 +2,8 @@
 
 window.CivPlayerControls = (() => {
   let steps = [];
+  let resourceSteps = [];
+  let resourceMap = {};
   let index = 0;
   let timer = null;
   let playing = false;
@@ -52,13 +54,29 @@ window.CivPlayerControls = (() => {
     pack.cells.state[step.cell] = forward ? step.to : step.from;
   }
 
+  function applyResources(i, forward = true) {
+    const ids = resourceMap[i];
+    if (!ids) return;
+    ids.forEach(id => {
+      const deposit = pack.resources.find(r => r.i === id);
+      if (!deposit) return;
+      forward ? Resources.discoverDeposit(deposit) : Resources.hideDeposit(deposit);
+    });
+  }
+
   function resetToInitial() {
     if (initialStates) pack.cells.state.set(initialStates);
     index = 0;
+    Object.values(resourceMap).flat().forEach(id => {
+      const deposit = pack.resources.find(r => r.i === id);
+      if (deposit) Resources.hideDeposit(deposit);
+    });
+    applyResources(0, true);
   }
 
   function draw() {
     if (layerIsOn('toggleStates')) drawStates();
+    if (layerIsOn('toggleResources')) drawResources();
     updateCounter();
   }
 
@@ -69,6 +87,7 @@ window.CivPlayerControls = (() => {
     }
     applyStep(index, true);
     index++;
+    applyResources(index, true);
     draw();
   }
 
@@ -76,10 +95,17 @@ window.CivPlayerControls = (() => {
     if (growthSteps && growthSteps.steps) {
       steps = growthSteps.steps;
       initialStates = growthSteps.initialStates || null;
+      resourceSteps = growthSteps.resourceSteps || [];
     } else {
       steps = growthSteps || [];
       initialStates = null;
+      resourceSteps = [];
     }
+    resourceMap = resourceSteps.reduce((m, r) => {
+      if (!m[r.step]) m[r.step] = [];
+      m[r.step].push(r.id);
+      return m;
+    }, {});
     resetToInitial();
     draw();
   }
@@ -95,6 +121,7 @@ window.CivPlayerControls = (() => {
     if (index < steps.length) {
       applyStep(index, true);
       index++;
+      applyResources(index, true);
       draw();
     }
   }
@@ -104,6 +131,7 @@ window.CivPlayerControls = (() => {
     if (index > 0) {
       index--;
       applyStep(index, false);
+      applyResources(index, false);
       draw();
     }
   }
@@ -118,6 +146,12 @@ window.CivPlayerControls = (() => {
     const data = BurgsAndStates.expandStatesWithSteps();
     steps = data.steps;
     initialStates = data.initialStates;
+    resourceSteps = Resources.computeDiscoverySteps(steps, initialStates);
+    resourceMap = resourceSteps.reduce((m, r) => {
+      if (!m[r.step]) m[r.step] = [];
+      m[r.step].push(r.id);
+      return m;
+    }, {});
     resetToInitial();
     draw();
     play();
