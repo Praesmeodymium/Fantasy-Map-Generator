@@ -229,7 +229,8 @@ window.BurgsAndStates = (() => {
 
       // shift burgs on rivers semi-randomly and just a bit
       if (!b.port && cells.r[i]) {
-        const shift = Math.min(cells.fl[i] / 150, 1);
+        const flux = cells.fl?.[i] || 0;
+        const shift = Math.min(flux / 150, 1);
         if (i % 2) b.x = rn(b.x + shift, 2);
         else b.x = rn(b.x - shift, 2);
         if (cells.r[i] % 2) b.y = rn(b.y + shift, 2);
@@ -287,7 +288,7 @@ window.BurgsAndStates = (() => {
 
     if (cells.h[cellId] > 60) return "Highland";
 
-    if (cells.r[cellId] && cells.fl[cellId] >= 100) return "River";
+    if (cells.r[cellId] && (cells.fl?.[cellId] || 0) >= 100) return "River";
 
     const biome = cells.biome[cellId];
     const population = cells.pop[cellId];
@@ -341,7 +342,8 @@ window.BurgsAndStates = (() => {
   function getRiverCost(r, i, type) {
     if (type === "River") return r ? 0 : 100; // penalty for river cultures
     if (!r) return 0; // no penalty for others if there is no river
-    return minmax(cells.fl[i] / 10, 20, 100); // river penalty from 20 to 100 based on flux
+    const flux = cells.fl?.[i] || 0;
+    return minmax(flux / 10, 20, 100); // river penalty from 20 to 100 based on flux
   }
 
   function getTypeCost(t, type) {
