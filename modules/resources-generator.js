@@ -44,7 +44,7 @@ window.Resources = (function () {
       else pack.cells.hiddenResource[c] = typeId;
     });
     const id = (last(pack.resources)?.i || 0) + 1;
-    const deposit = {i: id, type: typeId, x: rn(x,2), y: rn(y,2), cell, size, tons, visible};
+    const deposit = {i: id, type: typeId, x: rn(x,2), y: rn(y,2), cell, size, tons, visible, discoveredStep: visible ? 0 : Infinity};
     pack.resources.push(deposit);
     return deposit;
   }
@@ -239,6 +239,18 @@ window.Resources = (function () {
     deposit.visible = true;
   }
 
+  function hideDeposit(deposit) {
+    if (!deposit.visible) return;
+    const cells = findAll(deposit.x, deposit.y, deposit.size);
+    cells.forEach(c => {
+      if (pack.cells.resource[c] === deposit.type) {
+        pack.cells.resource[c] = 0;
+        pack.cells.hiddenResource[c] = deposit.type;
+      }
+    });
+    deposit.visible = false;
+  }
+
   // discover resources around existing burgs
   function discoverAroundBurgs(radius = 2) {
     const {burgs} = pack;
@@ -252,6 +264,51 @@ window.Resources = (function () {
       });
       if (near) discoverDeposit(r);
     });
+  }
+
+  function computeDiscoverySteps(steps, initialStates, radius = 2) {
+    const {burgs} = pack;
+    if (!burgs) return [];
+    const radius2 = (radius * grid.spacing) ** 2;
+
+    const nearStates = {};
+    pack.resources.forEach(r => {
+      const states = new Set();
+      burgs.forEach(b => {
+        if (!b.i || b.removed) return;
+        const dx = r.x - b.x;
+        const dy = r.y - b.y;
+        if (dx * dx + dy * dy <= radius2) states.add(b.state);
+      });
+      nearStates[r.i] = states;
+    });
+
+    const byCell = {};
+    pack.resources.forEach(r => (byCell[r.cell] = r));
+
+    const current = new Uint16Array(initialStates);
+    const results = [];
+
+    pack.resources.forEach(r => {
+      if (nearStates[r.i].has(current[r.cell])) {
+        r.discoveredStep = 0;
+        results.push({id: r.i, step: 0});
+      } else {
+        r.discoveredStep = Infinity;
+      }
+    });
+
+    steps.forEach((s, i) => {
+      current[s.cell] = s.to;
+      const r = byCell[s.cell];
+      if (r && r.discoveredStep === Infinity && nearStates[r.i].has(current[r.cell])) {
+        r.discoveredStep = i + 1;
+        results.push({id: r.i, step: i + 1});
+      }
+    });
+
+    results.sort((a, b) => a.step - b.step);
+    return results;
   }
 
   return {
@@ -272,9 +329,11 @@ window.Resources = (function () {
     isTypeVisible,
     getHidden,
     discoverAroundBurgs,
+    computeDiscoverySteps,
     addDeposit,
     removeHiddenDeposit,
     discoverDeposit,
+    hideDeposit,
     getRandomSize,
     getDepositTons,
     getResourceWeight,

@@ -29,6 +29,10 @@ window.BurgsAndStates = (() => {
 
     placeTowns();
     const growthData = showGrowth ? expandStatesWithSteps() : (expandStates(), null);
+    let resourceSteps = null;
+    if (showGrowth && growthData) {
+      resourceSteps = Resources.computeDiscoverySteps(growthData.steps, growthData.initialStates);
+    }
     normalizeStates();
     getPoles();
 
@@ -40,7 +44,7 @@ window.BurgsAndStates = (() => {
     generateCampaigns();
     generateDiplomacy();
 
-    return {growthSteps: growthData};
+    return {growthSteps: growthData, resourceSteps};
 
     function placeCapitals() {
       TIME && console.time("placeCapitals");

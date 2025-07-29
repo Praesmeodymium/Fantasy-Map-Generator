@@ -653,7 +653,7 @@ async function generate(options) {
     rankCells();
     Cultures.generate();
     Cultures.expand();
-    const {growthSteps} = BurgsAndStates.generate({showGrowth: byId("showGrowth")?.checked});
+    const {growthSteps, resourceSteps} = BurgsAndStates.generate({showGrowth: byId("showGrowth")?.checked});
     Resources.discoverAroundBurgs();
     Routes.generate();
     Religions.generate();
@@ -677,7 +677,8 @@ async function generate(options) {
     if (byId("showGrowth")?.checked) {
       // Growth steps computed above will be passed to CivPlayerControls
     }
-    CivPlayerControls.start(growthSteps);
+    const replayData = growthSteps ? {...growthSteps, resourceSteps} : {steps: [], initialStates: null, resourceSteps};
+    CivPlayerControls.start(replayData);
     INFO && console.groupEnd("Generated Map " + seed);
   } catch (error) {
     ERROR && console.error(error);
