@@ -71,7 +71,11 @@ window.Resources = (function () {
       return types;
     }
     try {
-      types = await (await fetch("config/resources.json")).json();
+      if (typeof resourcesData !== "undefined") {
+        types = resourcesData;
+      } else {
+        types = await (await fetch("config/resources.json")).json();
+      }
       localStorage.setItem(STORAGE_KEY, JSON.stringify(types));
     } catch (e) {
       console.error("Failed to load resources config", e);
