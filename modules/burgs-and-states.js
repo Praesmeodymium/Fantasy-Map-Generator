@@ -132,6 +132,18 @@ window.BurgsAndStates = (() => {
         coa.shield = COA.getShield(b.culture, null);
         const nearResources = getResourcesAround(b.cell);
         const tech = rn(1 + nearResources.reduce((sum, r) => sum + Resources.getCivImpact(r), 0) / 20, 2);
+        // governance efficiency is based on culture type and dominant religion
+        const cultureType = cultures[b.culture].type;
+        let govEfficiency = 1;
+        if (cultureType === "Nomadic") govEfficiency -= 0.2;
+        if (cultureType === "Naval") govEfficiency += 0.05;
+        const religionId = cells.religion[b.cell];
+        if (religionId && pack.religions[religionId]) {
+          const rType = pack.religions[religionId].type;
+          if (rType === "Cult") govEfficiency -= 0.1;
+          if (rType === "Organized") govEfficiency += 0.05;
+        }
+        govEfficiency = rn(govEfficiency + gauss(0, 0.1), 2);
         const resourceNames = nearResources.map(r => Resources.getType(r)?.name).filter(Boolean);
         states.push({
           i,
@@ -143,6 +155,7 @@ window.BurgsAndStates = (() => {
           center: b.cell,
           culture: b.culture,
           coa,
+          gov: govEfficiency,
           resources: resourceNames,
           tech
         });
@@ -362,6 +375,9 @@ window.BurgsAndStates = (() => {
     TIME && console.time("expandStates");
     const {cells, states, cultures, burgs} = pack;
 
+    // compute running governance average for this growth step
+    const avgGovRunning = updateGovAverage();
+
     cells.state = cells.state || new Uint16Array(cells.i.length);
 
     const queue = new FlatQueue();
@@ -408,7 +424,8 @@ window.BurgsAndStates = (() => {
         const typeCost = getTypeCost(cells.t[e], type);
         const cellCost = Math.max(cultureCost + populationCost + biomeCost + heightCost + riverCost + typeCost, 0);
         const techMultiplier = 1 + states[s].tech * tech_scaling;
-        const totalCost = p + 10 + cellCost / (states[s].expansionism * techMultiplier);
+        const govMultiplier = states[s].gov * avgGovRunning;
+        const totalCost = p + 10 + cellCost / (states[s].expansionism * techMultiplier * govMultiplier);
 
         if (totalCost > growthRate) return;
 
@@ -428,6 +445,9 @@ window.BurgsAndStates = (() => {
   const expandStatesWithSteps = () => {
     TIME && console.time("expandStatesWithSteps");
     const {cells, states, cultures, burgs} = pack;
+
+    // compute running governance average for this growth step
+    const avgGovRunning = updateGovAverage();
 
     cells.state = cells.state || new Uint16Array(cells.i.length);
 
@@ -476,7 +496,8 @@ window.BurgsAndStates = (() => {
         const typeCost = getTypeCost(cells.t[e], type);
         const cellCost = Math.max(cultureCost + populationCost + biomeCost + heightCost + riverCost + typeCost, 0);
         const techMultiplier = 1 + states[s].tech * tech_scaling;
-        const totalCost = p + 10 + cellCost / (states[s].expansionism * techMultiplier);
+        const govMultiplier = states[s].gov * avgGovRunning;
+        const totalCost = p + 10 + cellCost / (states[s].expansionism * techMultiplier * govMultiplier);
 
         if (totalCost > growthRate) return;
 
@@ -623,6 +644,37 @@ window.BurgsAndStates = (() => {
     Crusade: 1
   };
 
+  // update running average of government efficiency and return it
+  const updateGovAverage = () => {
+    const valid = pack.states.filter(s => s.i && !s.removed);
+    const avg = d3.mean(valid.map(s => s.gov || 1)) || 1;
+    pack.stats = pack.stats || {};
+    if (pack.stats.govAvg) pack.stats.govAvg = rn((pack.stats.govAvg + avg) / 2, 2);
+    else pack.stats.govAvg = rn(avg, 2);
+    return pack.stats.govAvg;
+  };
+
+  // compute tension score between two states based on expansionism, resources,
+  // cultural and religious differences and government efficiency
+  function computeTension(a, b) {
+    const s1 = pack.states[a];
+    const s2 = pack.states[b];
+    if (!s1 || !s2) return 0;
+    let score = 0;
+    score += Math.abs(s1.expansionism - s2.expansionism);
+    score += Math.abs((s1.resources ? s1.resources.length : 0) - (s2.resources ? s2.resources.length : 0));
+    if (s1.culture !== s2.culture) score += 2;
+    const r1 = pack.cells.religion[s1.center];
+    const r2 = pack.cells.religion[s2.center];
+    if (r1 !== r2) score += 1.5;
+    const avgGov = pack.stats?.govAvg || 1;
+    const gov1 = (s1.gov || 1) * avgGov;
+    const gov2 = (s2.gov || 1) * avgGov;
+    const govFactor = (2 - gov1 + 2 - gov2) / 2;
+    score *= govFactor;
+    return rn(score, 2);
+  }
+
   const generateCampaign = state => {
     const neighbors = state.neighbors.length ? state.neighbors : [0];
     return neighbors
@@ -647,6 +699,7 @@ window.BurgsAndStates = (() => {
   const generateDiplomacy = () => {
     TIME && console.time("generateDiplomacy");
     const {cells, states} = pack;
+    updateGovAverage();
     const chronicle = (states[0].diplomacy = []);
     const valid = states.filter(s => s.i && !states.removed);
 
@@ -654,6 +707,9 @@ window.BurgsAndStates = (() => {
     const neibsOfNeibs = {Ally: 10, Friendly: 8, Neutral: 5, Suspicion: 1}; // relations to neighbors of neighbors
     const far = {Friendly: 1, Neutral: 12, Suspicion: 2, Unknown: 6}; // relations to other
     const navals = {Neutral: 1, Suspicion: 2, Rival: 1, Unknown: 1}; // relations of naval powers
+
+    // initialize tension matrices
+    valid.forEach(s => (s.tension = new Array(states.length).fill(0)));
 
     valid.forEach(s => (s.diplomacy = new Array(states.length).fill("x"))); // clear all relationships
     if (valid.length < 2) return; // no states to renerate relations with
@@ -702,7 +758,11 @@ window.BurgsAndStates = (() => {
                 .join("")
                 .includes(t);
 
+        const tscore = computeTension(f, t);
         let status = naval ? rw(navals) : neib ? rw(neibs) : neibOfNeib ? rw(neibsOfNeibs) : rw(far);
+        if (tscore > 10) status = "Rival";
+        else if (tscore > 6 && status !== "Rival") status = "Suspicion";
+        states[f].tension[t] = states[t].tension[f] = tscore;
 
         // add Vassal
         if (
@@ -726,10 +786,13 @@ window.BurgsAndStates = (() => {
       if (ad.includes("Vassal")) continue; // not independent
       if (ad.includes("Enemy")) continue; // already at war
 
-      // random independent rival
-      const defender = ra(
-        ad.map((r, d) => (r === "Rival" && !states[d].diplomacy.includes("Vassal") ? d : 0)).filter(d => d)
-      );
+      // choose rival with the highest tension
+      const rivals = ad
+        .map((r, d) => (r === "Rival" && !states[d].diplomacy.includes("Vassal") ? d : 0))
+        .filter(d => d);
+      if (!rivals.length) continue;
+      const defender = rivals.sort((a, b) => states[attacker].tension[b] - states[attacker].tension[a])[0];
+      if (states[attacker].tension[defender] < 15) continue; // tension too low
       let ap = states[attacker].area * states[attacker].expansionism;
       let dp = states[defender].area * states[defender].expansionism;
       if (ap < dp * gauss(1.6, 0.8, 0, 10, 2)) continue; // defender is too strong
@@ -998,6 +1061,8 @@ window.BurgsAndStates = (() => {
     generateCampaign,
     generateCampaigns,
     generateDiplomacy,
+    updateGovAverage,
+    computeTension,
     defineStateForms,
     getFullName,
     updateCultures,
