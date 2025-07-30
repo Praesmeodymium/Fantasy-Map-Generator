@@ -137,8 +137,8 @@ window.BurgsAndStates = (() => {
         let govEfficiency = 1;
         if (cultureType === "Nomadic") govEfficiency -= 0.2;
         if (cultureType === "Naval") govEfficiency += 0.05;
-        const religionId = cells.religion[b.cell];
-        if (religionId && pack.religions[religionId]) {
+        const religionId = cells.religion ? cells.religion[b.cell] : 0;
+        if (pack.religions && religionId && pack.religions[religionId]) {
           const rType = pack.religions[religionId].type;
           if (rType === "Cult") govEfficiency -= 0.1;
           if (rType === "Organized") govEfficiency += 0.05;
@@ -664,8 +664,8 @@ window.BurgsAndStates = (() => {
     score += Math.abs(s1.expansionism - s2.expansionism);
     score += Math.abs((s1.resources ? s1.resources.length : 0) - (s2.resources ? s2.resources.length : 0));
     if (s1.culture !== s2.culture) score += 2;
-    const r1 = pack.cells.religion[s1.center];
-    const r2 = pack.cells.religion[s2.center];
+    const r1 = pack.cells.religion ? pack.cells.religion[s1.center] : 0;
+    const r2 = pack.cells.religion ? pack.cells.religion[s2.center] : 0;
     if (r1 !== r2) score += 1.5;
     const avgGov = pack.stats?.govAvg || 1;
     const gov1 = (s1.gov || 1) * avgGov;
